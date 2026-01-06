@@ -1,0 +1,12 @@
+[package]
+name = "with-cc-build"
+version = "1.0.0"
+edition = "2021"
+publish = false # "private"
+
+[[bin]]
+name = "example"
+path = "src/main.rs"
+
+[dependencies]
+zstd.workspace = true

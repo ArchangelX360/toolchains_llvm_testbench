@@ -1,0 +1,5 @@
+.idea
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-toolchains_llvm_testbench

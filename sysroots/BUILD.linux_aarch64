@@ -1,0 +1,7 @@
+# See README.md to understand how this sysroot is built
+
+filegroup(
+  name = "sysroot",
+  srcs = glob(["*/**"]),
+  visibility = ["//visibility:public"],
+)

@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = [
+    "with-cc-build"
+]
+
+[workspace.dependencies]
+zstd = "0.13"
+
+[patch.crates-io]
+cc = { git = "https://github.com/ArchangelX360/cc-rs", branch = "archangelx360/cc-v1.2.45_msvc_patches" }

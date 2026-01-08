@@ -17,6 +17,7 @@ bazel build //rust/... --platforms=//native/platforms:macos-x86_64 || echo "fail
 bazel build //rust/... --platforms=//native/platforms:macos-aarch64 || echo "failed on macos-aarch64 (rust)"
 bazel build //rust/... --platforms=//native/platforms:windows-x86_64 || echo "failed on windows-x86_64 (rust)"
 bazel build //rust/... --platforms=//native/platforms:windows-aarch64 || echo "failed on windows-aarch64 (rust)"
+exit 0
 :CMDSCRIPT
 
 echo "linux-x86_64-glibc (rust)" && call bazelisk.exe build //rust/... --platforms=//native/platforms:linux-x86_64-glibc

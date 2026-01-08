@@ -4,7 +4,8 @@ Project to try out `bazel-contrib/toolchains_llvm` changes on different OSes.
 
 ## Usage
 
-A toolchain is considered working the following script runs without errors on every supported host (Windows, Linux, macOS, on
+A toolchain is considered working the following script runs without errors on every supported host (Windows, Linux,
+macOS, on
 x86_64 and aarch64 architectures):
 
 ```shell
@@ -25,42 +26,40 @@ x86_64 and aarch64 architectures):
 | `rules_rust`* | `aarch64-apple-darwin`      | `x86_64-apple-darwin`       | ✅       |                        |
 | `rules_rust`* | `aarch64-apple-darwin`      | `aarch64-unknown-linux-gnu` | ✅       |                        |
 | `rules_rust`* | `aarch64-apple-darwin`      | `x86_64-unknown-linux-gnu`  | ✅       |                        |
-| `rules_rust`* | `aarch64-apple-darwin`      | `aarch64-pc-windows-msvc`   | 🔴      | [2]                    |
-| `rules_rust`* | `aarch64-apple-darwin`      | `x86_64-pc-windows-msvc`    | 🔴      | [2]                    |
-| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | 🔴      | [3]                    |
-| `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | 🔴      | [3]                    |
+| `rules_rust`* | `aarch64-apple-darwin`      | `aarch64-pc-windows-msvc`   | ✅       |                        |
+| `rules_rust`* | `aarch64-apple-darwin`      | `x86_64-pc-windows-msvc`    | ✅       |                        |
+| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | 🔴      | [2]                    |
+| `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | 🔴      | [2]                    |
 | `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-unknown-linux-gnu` | ✅       |                        |
 | `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-unknown-linux-gnu`  | ✅       |                        |
-| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | 🔴      | [4]                    |
+| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | 🔴      | [3]                    |
 | `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | 🔴      | [1]                    |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | 🔴      | [3]                    |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | 🔴      | [3]                    |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | 🔴      | [2]                    |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | 🔴      | [2]                    |
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-unknown-linux-gnu` | ✅       |                        |
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-unknown-linux-gnu`  | ✅       |                        |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | 🔴      | [2]                    |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | 🔴      | [2]                    |
-| `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [3]                    |
-| `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [3]                    |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | 🔴      | [3]                    |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | 🔴      | [3]                    |
+| `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [2]                    |
+| `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [2]                    |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | ✅       |                        |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-unknown-linux-gnu`  | ✅       |                        |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-pc-windows-msvc`   | ✅       |                        |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-pc-windows-msvc`    | 🔴      | [1]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [3]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [3]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | 🔴      | [5]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-unknown-linux-gnu`  | 🔴      | [5]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-pc-windows-msvc`   | 🔴      | [2]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-pc-windows-msvc`    | 🔴      | [2]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [2]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [2]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | 🔴      | [4]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-unknown-linux-gnu`  | 🔴      | [4]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-pc-windows-msvc`   | ✅       |                        |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-pc-windows-msvc`    | ✅       |                        |
 
-*: simple program with a dependency on `zstd-sys` crate which has a `cc` crate call in its `build.rs` (c++ compilation)
+*: simple program with a dependency on `zstd-sys` crate which has a `cc` crate call in its `build.rs` (c++ compilation),
+`rules_rust` is patched on `INCLUDE` env var setting
 
 [1]:
 `lld-link: error: bazel-out/darwin_arm64-fastbuild/bin/cc/clang-rt/_objs/example/main.obj: machine type arm64 conflicts with x64`
 
-[2]: some issue about not finding some libraries in `cc` crate call in `zstd-sys`'s `build.rs` which is used as an
-example dependency using CC compilation
-
-[3]:
+[2]:
 
 ```
 ld64.lld: error: unknown argument '--build-id=md5'
@@ -69,9 +68,12 @@ ld64.lld: error: unknown argument '-z'
 ld64.lld: error: unknown argument '-z'
 ```
 
-[4]: `lld-link: error: could not open 'kernel32.lib': No such file or directory`
+[3]: `lld-link: error: could not open 'kernel32.lib': No such file or directory`, potential lead sysroot path seems
+incorrect `/LIBPATH:external/+local_archive_ext+sysroot-windows_aarch64//Lib
+`
 
-[5]: Permission denied failures
+[4]: Permission denied failures
+
 ```
 ERROR: C:/users/titouan.bion/developer_windows/toolchains_llvm_testbench/rust/with-cc-build/BUILD.bazel:6:12: Compiling
 Rust bin example (1 file) failed: (Exit 1): process_wrapper.exe failed: error executing Rustc command (from target

@@ -15,6 +15,7 @@ git_override(
     patch_strip = 1,
     patches = [
         "//:rules_rust-lib_include.patch",  # Fix `cc` crate compilation in `build.rs` that calls it
+        "//:rules_rust-verbose.patch",  # Increase verbosity
     ],
     remote = "https://github.com/bazelbuild/rules_rust",
 )

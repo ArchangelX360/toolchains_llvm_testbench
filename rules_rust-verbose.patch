@@ -1,0 +1,19 @@
+Subject: [PATCH] lol
+---
+Index: rust/private/rustc.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/rust/private/rustc.bzl b/rust/private/rustc.bzl
+--- a/rust/private/rustc.bzl	(revision 3239a0ee48c28d474484c321fb6f89f76aac11ae)
++++ b/rust/private/rustc.bzl	(revision fa66dffb7ec64ca793c906b38d91c4e73240283d)
+@@ -940,6 +940,7 @@
+     rustc_flags.add(crate_info.root)
+     rustc_flags.add(crate_info.name, format = "--crate-name=%s")
+     rustc_flags.add(crate_info.type, format = "--crate-type=%s")
++    rustc_flags.add("--verbose")
+
+     if error_format == None:
+         error_format = get_error_format(attr, "_error_format")
+ll

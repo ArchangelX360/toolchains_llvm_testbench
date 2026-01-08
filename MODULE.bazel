@@ -5,8 +5,8 @@ bazel_dep(name = "rules_rust", version = "0.68.1")
 
 git_override(
     module_name = "toolchains_llvm",
-    remote = "https://github.com/ArchangelX360/toolchains_llvm", # Add Windows support, this is a temporary fork until this is merged https://github.com/bazel-contrib/toolchains_llvm/pull/642
     commit = "c8f523d554bbb2e3e8dbf9402f1138d143a8dd62",
+    remote = "https://github.com/ArchangelX360/toolchains_llvm",  # Add Windows support, this is a temporary fork until this is merged https://github.com/bazel-contrib/toolchains_llvm/pull/642
 )
 
 git_override(
@@ -23,40 +23,40 @@ local_archive_ext = use_extension("//:defs.bzl", "local_archive_ext")
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-darwin",
-    build_file = "@//sysroots:BUILD.darwin",
     src = "//sysroots:sysroot-macos-SDK_15.5-5185e391ddaec47fc3c03b0bd85082b1.tar.gz",
+    build_file = "@//sysroots:BUILD.darwin",
 )
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-windows_aarch64",
-    build_file = "@//sysroots:BUILD.windows_aarch64",
     src = "//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-6E92FED8A6D11F344CEB8F5FF4CC5F31.tar.gz",
+    build_file = "@//sysroots:BUILD.windows_aarch64",
 )
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-windows_x86_64",
-    build_file = "@//sysroots:BUILD.windows_x86_64",
     src = "//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-6E92FED8A6D11F344CEB8F5FF4CC5F31.tar.gz",
+    build_file = "@//sysroots:BUILD.windows_x86_64",
 )
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-linux-aarch64",
-    build_file = "@//sysroots:BUILD.linux_aarch64",
     src = "//sysroots:sysroot-linux_aarch64_3.3.0.65682.tar.zst",
+    build_file = "@//sysroots:BUILD.linux_aarch64",
 )
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-linux-x86_64",
-    build_file = "@//sysroots:BUILD.linux_x86_64",
     src = "//sysroots:sysroot-linux_x86_64_3.3.0.65682.tar.zst",
+    build_file = "@//sysroots:BUILD.linux_x86_64",
 )
 use_repo(
     local_archive_ext,
     "sysroot-darwin",
-    "sysroot-windows_aarch64",
-    "sysroot-windows_x86_64",
     "sysroot-linux-aarch64",
     "sysroot-linux-x86_64",
+    "sysroot-windows_aarch64",
+    "sysroot-windows_x86_64",
 )
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
@@ -99,9 +99,11 @@ llvm.extra_target_compatible_with(
     ],
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
+
 register_toolchains("@llvm_toolchain//:all")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+
 RUST_TARGETS = [
     "aarch64-apple-darwin",
     "x86_64-apple-darwin",
@@ -110,12 +112,14 @@ RUST_TARGETS = [
     "aarch64-unknown-linux-gnu",
     "x86_64-unknown-linux-gnu",
 ]
+
 rust.toolchain(
     edition = "2021",
     extra_target_triples = RUST_TARGETS,
     versions = ["1.89.0"],
 )
 use_repo(rust, "rust_toolchains")
+
 register_toolchains("@rust_toolchains//:all")
 
 crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")

@@ -9,15 +9,13 @@ git_override(
     remote = "https://github.com/ArchangelX360/toolchains_llvm",  # Add Windows support, this is a temporary fork until this is merged https://github.com/bazel-contrib/toolchains_llvm/pull/642
 )
 
-git_override(
+single_version_override(
     module_name = "rules_rust",
-    commit = "cdaf15f5796e3e934b074526272823284bbaed01",
     patch_strip = 1,
     patches = [
         "//:rules_rust-lib_include.patch",  # Fix `cc` crate compilation in `build.rs` that calls it
         "//:rules_rust-verbose.patch",  # Increase verbosity
     ],
-    remote = "https://github.com/bazelbuild/rules_rust",
 )
 
 local_archive_ext = use_extension("//:defs.bzl", "local_archive_ext")

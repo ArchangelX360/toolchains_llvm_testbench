@@ -1,5 +1,5 @@
 {
-  "checksum": "6fab85e906a1f1121c44c8ada7a50008353073f8a4af18b72e003380e1e7dbf1",
+  "checksum": "6431601ff31af2e8fb86eedf4be62878432240b2e368c078e9a27b4bde2897aa",
   "crates": {
     "cc 1.2.45": {
       "name": "cc",
@@ -60,7 +60,7 @@
                 "target": "libc"
               }
             ],
-            "aarch64-unknown-linux-gnu": [
+            "aarch64-unknown-linux-musl": [
               {
                 "id": "libc 0.2.179",
                 "target": "libc"
@@ -72,7 +72,7 @@
                 "target": "libc"
               }
             ],
-            "x86_64-unknown-linux-gnu": [
+            "x86_64-unknown-linux-musl": [
               {
                 "id": "libc 0.2.179",
                 "target": "libc"
@@ -972,12 +972,12 @@
     "aarch64-pc-windows-msvc": [
       "aarch64-pc-windows-msvc"
     ],
-    "aarch64-unknown-linux-gnu": [
-      "aarch64-unknown-linux-gnu"
+    "aarch64-unknown-linux-musl": [
+      "aarch64-unknown-linux-musl"
     ],
     "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))": [
-      "aarch64-unknown-linux-gnu",
-      "x86_64-unknown-linux-gnu"
+      "aarch64-unknown-linux-musl",
+      "x86_64-unknown-linux-musl"
     ],
     "cfg(all(target_arch = \"wasm32\", target_os = \"wasi\", target_env = \"p2\"))": [],
     "cfg(all(target_os = \"uefi\", getrandom_backend = \"efi_rng\"))": [],
@@ -993,9 +993,9 @@
     "cfg(target_os = \"vxworks\")": [],
     "cfg(unix)": [
       "aarch64-apple-darwin",
-      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-linux-musl",
       "x86_64-apple-darwin",
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-musl"
     ],
     "cfg(windows)": [
       "aarch64-pc-windows-msvc",
@@ -1007,8 +1007,8 @@
     "x86_64-pc-windows-msvc": [
       "x86_64-pc-windows-msvc"
     ],
-    "x86_64-unknown-linux-gnu": [
-      "x86_64-unknown-linux-gnu"
+    "x86_64-unknown-linux-musl": [
+      "x86_64-unknown-linux-musl"
     ]
   },
   "direct_deps": [

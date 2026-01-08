@@ -9,6 +9,16 @@ git_override(
     commit = "c8f523d554bbb2e3e8dbf9402f1138d143a8dd62",
 )
 
+git_override(
+    module_name = "rules_rust",
+    remote = "https://github.com/bazelbuild/rules_rust",
+    commit = "cdaf15f5796e3e934b074526272823284bbaed01",
+    patches = [
+        "//:rules_rust-lib_include.patch", # Fix `cc` crate compilation in `build.rs` that calls it
+    ],
+    patch_strip = 1,
+)
+
 local_archive_ext = use_extension("//:defs.bzl", "local_archive_ext")
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built

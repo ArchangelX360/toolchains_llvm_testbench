@@ -28,18 +28,18 @@ x86_64 and aarch64 architectures):
 | `rules_rust`* | `aarch64-apple-darwin`      | `x86_64-unknown-linux-gnu`  | ✅       |                        |
 | `rules_rust`* | `aarch64-apple-darwin`      | `aarch64-pc-windows-msvc`   | ✅       |                        |
 | `rules_rust`* | `aarch64-apple-darwin`      | `x86_64-pc-windows-msvc`    | ✅       |                        |
-| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | 🔴      | [2]                    |
-| `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | 🔴      | [2]                    |
+| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | ✅       |                        |
+| `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | ✅       |                        |
 | `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-unknown-linux-gnu` | ✅       |                        |
 | `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-unknown-linux-gnu`  | ✅       |                        |
-| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | 🔴      | [3]                    |
+| `rules_cc`    | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | ✅       |                        |
 | `rules_cc`    | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | 🔴      | [1]                    |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | 🔴      | [2]                    |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | 🔴      | [2]                    |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-apple-darwin`      | ✅       |                        |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-apple-darwin`       | ✅       |                        |
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-unknown-linux-gnu` | ✅       |                        |
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-unknown-linux-gnu`  | ✅       |                        |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | 🔴      | [3]                    |
-| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | 🔴      | [3]                    |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | ✅       |                        |
+| `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | ✅       |                        |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [2]                    |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [2]                    |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | ✅       |                        |

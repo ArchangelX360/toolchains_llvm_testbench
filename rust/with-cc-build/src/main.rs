@@ -7,7 +7,7 @@ fn main() {
     let source_filepath = PathBuf::from("/tmp/hello.tar.zst");
     let source_file = File::open(&source_filepath).unwrap();
     let reader = BufReader::new(source_file);
-    let mut archive_reader = zstd::stream::Decoder::new(reader).unwrap();
+    let archive_reader = zstd::stream::Decoder::new(reader).unwrap();
     let extraction_directory = PathBuf::from("/tmp/hello");
     Archive::new(archive_reader).unpack(extraction_directory).unwrap();
 }

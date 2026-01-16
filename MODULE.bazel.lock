@@ -165,6 +165,8 @@
     "https://bcr.bazel.build/modules/tar.bzl/0.2.1/MODULE.bazel": "52d1c00a80a8cc67acbd01649e83d8dd6a9dc426a6c0b754a04fe8c219c76468",
     "https://bcr.bazel.build/modules/tar.bzl/0.6.0/MODULE.bazel": "a3584b4edcfafcabd9b0ef9819808f05b372957bbdff41601429d5fd0aac2e7c",
     "https://bcr.bazel.build/modules/tar.bzl/0.6.0/source.json": "4a620381df075a16cb3a7ed57bd1d05f7480222394c64a20fa51bdb636fda658",
+    "https://bcr.bazel.build/modules/toolchains_musl/0.1.27/MODULE.bazel": "f0856007f2ce24a281cd9e525042e27ffa265788b70de104f0aa3b5f419b1889",
+    "https://bcr.bazel.build/modules/toolchains_musl/0.1.27/source.json": "0ae6075148dfb80b796cf5ff181babecaa4f2766e5afcf2fe3b68dfb930c6f0f",
     "https://bcr.bazel.build/modules/upb/0.0.0-20220923-a547704/MODULE.bazel": "7298990c00040a0e2f121f6c32544bab27d4452f80d9ce51349b1a28f3005c43",
     "https://bcr.bazel.build/modules/yq.bzl/0.1.1/MODULE.bazel": "9039681f9bcb8958ee2c87ffc74bdafba9f4369096a2b5634b88abc0eaefa072",
     "https://bcr.bazel.build/modules/yq.bzl/0.1.1/source.json": "2d2bad780a9f2b9195a4a370314d2c17ae95eaa745cefc2e12fbc49759b15aa3",
@@ -177,7 +179,7 @@
   "moduleExtensions": {
     "//:defs.bzl%local_archive_ext": {
       "general": {
-        "bzlTransitiveDigest": "1Wuk08fZBfTXW8A3djUaOY+Wtewr5xBcCLX2cYTpjos=",
+        "bzlTransitiveDigest": "B7R6LL8RAOVhGpUoufR5YfbYlQgi0t6v3mrlI8ZhXCY=",
         "usagesDigest": "ZJkI3U02AMI1FRjJlTpUJwo264wmttKho8Wb7BR38gw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -2950,7 +2952,7 @@
     },
     "@@rules_rust+//crate_universe/private:internal_extensions.bzl%cu_nr": {
       "general": {
-        "bzlTransitiveDigest": "sUVhfGnbUIrIYHpYQg8ghk9KD05eRScnn3Eg7Gy51T4=",
+        "bzlTransitiveDigest": "wp+REfZ+PT02Xqo5P3dvkREagsbx3g5Zuwqg3BsfcWI=",
         "usagesDigest": "v4We18mWSPeKV4GPp9Gne78W+jZOgP2pC1i4UN9br1g=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

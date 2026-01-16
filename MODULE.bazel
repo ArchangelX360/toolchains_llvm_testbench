@@ -1,7 +1,10 @@
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.2.16")
+
 bazel_dep(name = "toolchains_llvm", version = "1.6.0", dev_dependency = True)
+
 bazel_dep(name = "rules_rust", version = "0.68.1")
+
 bazel_dep(name = "toolchains_musl", version = "0.1.27", dev_dependency = True)
 
 git_override(
@@ -121,10 +124,14 @@ RUST_TARGETS = [
     "x86_64-unknown-linux-musl",
 ]
 
+RUST_EDITION = "2021"
+
+RUST_VERSION = "1.89.0"
+
 rust.toolchain(
-    edition = "2021",
+    edition = RUST_EDITION,
     extra_target_triples = RUST_TARGETS,
-    versions = ["1.89.0"],
+    versions = [RUST_VERSION],
 )
 
 # This overrides a default rust_repository_set created by rust_register_toolchain.

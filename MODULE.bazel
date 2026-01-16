@@ -1,7 +1,8 @@
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.2.16")
-bazel_dep(name = "toolchains_llvm", version = "1.6.0")
+bazel_dep(name = "toolchains_llvm", version = "1.6.0", dev_dependency = True)
 bazel_dep(name = "rules_rust", version = "0.68.1")
+bazel_dep(name = "toolchains_musl", version = "0.1.27", dev_dependency = True)
 
 git_override(
     module_name = "toolchains_llvm",
@@ -101,6 +102,11 @@ llvm.extra_target_compatible_with(
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
 
 register_toolchains("@llvm_toolchain//:all")
+
+toolchains_musl = use_extension("@toolchains_musl//:toolchains_musl.bzl", "toolchains_musl", dev_dependency = True)
+toolchains_musl.config(
+    extra_target_compatible_with = ["@//native/libc:musl"],
+)
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 

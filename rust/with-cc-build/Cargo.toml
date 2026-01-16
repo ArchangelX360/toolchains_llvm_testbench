@@ -9,4 +9,5 @@ name = "example"
 path = "src/main.rs"
 
 [dependencies]
+tar.workspace = true
 zstd.workspace = true

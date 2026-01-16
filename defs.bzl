@@ -1,3 +1,5 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
 def _local_archive_impl(repository_ctx):
     repository_ctx.extract(repository_ctx.attr.src)
     repository_ctx.file("BUILD.bazel", repository_ctx.read(repository_ctx.attr.build_file))
@@ -34,4 +36,23 @@ local_archive_ext = module_extension(
     tag_classes = {
         "archive": _archive_tag,
     },
+)
+
+def _rust_binary_for_platforms_impl(name, visibility, platforms, **kwargs):
+    for p in platforms:
+        rust_binary(
+            name = "{}_{}".format(name, p.name),
+            platform = p,
+            visibility = visibility,
+            **kwargs
+        )
+
+rust_binary_for_platforms = macro(
+    inherit_attrs = rust_binary,
+    attrs = {
+        "platform": None, # do not inherit that attribute from `rust_binary`, as we set it via the macro
+        # configurable = False because we cannot iterate of selectables https://github.com/bazelbuild/bazel/issues/8419
+        "platforms": attr.label_list(mandatory = True, configurable = False, doc = "The platforms for which that `rust_binary` must be defined"),
+    },
+    implementation = _rust_binary_for_platforms_impl,
 )

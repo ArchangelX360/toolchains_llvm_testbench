@@ -177,7 +177,7 @@
   "moduleExtensions": {
     "//:defs.bzl%local_archive_ext": {
       "general": {
-        "bzlTransitiveDigest": "I9bpHZHYpoClOCuKRCkv9F81RzqwxnKd49XAWgWJdEw=",
+        "bzlTransitiveDigest": "1Wuk08fZBfTXW8A3djUaOY+Wtewr5xBcCLX2cYTpjos=",
         "usagesDigest": "ZJkI3U02AMI1FRjJlTpUJwo264wmttKho8Wb7BR38gw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -224,6 +224,51 @@
             "",
             "",
             ""
+          ],
+          [
+            "",
+            "rules_rust",
+            "rules_rust+"
+          ],
+          [
+            "rules_cc+",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "rules_cc+",
+            "cc_compatibility_proxy",
+            "rules_cc++compatibility_proxy+cc_compatibility_proxy"
+          ],
+          [
+            "rules_cc+",
+            "rules_cc",
+            "rules_cc+"
+          ],
+          [
+            "rules_cc++compatibility_proxy+cc_compatibility_proxy",
+            "rules_cc",
+            "rules_cc+"
+          ],
+          [
+            "rules_rust+",
+            "bazel_skylib",
+            "bazel_skylib+"
+          ],
+          [
+            "rules_rust+",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "rules_rust+",
+            "rules_cc",
+            "rules_cc+"
+          ],
+          [
+            "rules_rust+",
+            "rules_rust",
+            "rules_rust+"
           ]
         ]
       }
@@ -411,7 +456,7 @@
     },
     "@@rules_python+//python/private/pypi:pip.bzl%pip_internal": {
       "general": {
-        "bzlTransitiveDigest": "Nx9+d6I2QmqWTy287IGIU43xtDu8Ew8K5MLxw5eoM/Y=",
+        "bzlTransitiveDigest": "OqLOCKj2DboiCOlIaaU7ItgTCKOwzIK7nMn+teGAIms=",
         "usagesDigest": "OLoIStnzNObNalKEMRq99FqenhPGLFZ5utVLV4sz7OI=",
         "recordedFileInputs": {
           "@@rules_python+//tools/publish/requirements_darwin.txt": "2994136eab7e57b083c3de76faf46f70fad130bc8e7360a7fed2b288b69e79dc",
@@ -2905,7 +2950,7 @@
     },
     "@@rules_rust+//crate_universe/private:internal_extensions.bzl%cu_nr": {
       "general": {
-        "bzlTransitiveDigest": "pMkAQslPyfor8tMOzvoXJhaKvTcAdwdqa/qj1hGJIxU=",
+        "bzlTransitiveDigest": "sUVhfGnbUIrIYHpYQg8ghk9KD05eRScnn3Eg7Gy51T4=",
         "usagesDigest": "v4We18mWSPeKV4GPp9Gne78W+jZOgP2pC1i4UN9br1g=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

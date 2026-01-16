@@ -55,41 +55,49 @@ WINDOWS_X86_64_CONSTRAINTS = [
 platform(
     name = "macos-aarch64",
     constraint_values = MACOS_AARCH64_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "macos-x86_64",
     constraint_values = MACOS_X86_64_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "linux-aarch64-musl",
     constraint_values = LINUX_AARCH64_MUSL_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "linux-x86_64-musl",
     constraint_values = LINUX_X86_64_MUSL_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "linux-aarch64-glibc",
     constraint_values = LINUX_AARCH64_GLIBC_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "linux-x86_64-glibc",
     constraint_values = LINUX_X86_64_GLIBC_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "windows-aarch64",
     constraint_values = WINDOWS_AARCH64_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 platform(
     name = "windows-x86_64",
     constraint_values = WINDOWS_X86_64_CONSTRAINTS,
+    visibility = ["//rust:__subpackages__"],
 )
 
 # Config settings for use in select() statements

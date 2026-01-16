@@ -37,7 +37,7 @@ diff --git a/cargo/private/cargo_build_script.bzl b/cargo/private/cargo_build_sc
          include = cc_env.get("INCLUDE")
          if include:
 -            env["INCLUDE"] = include
-+            env["INCLUDE"] = ";".join(_pwd_paths(include.split(";")))
++            env["INCLUDE"] = ";".join(_pwd_paths(include.split(";"))) # TODO this only works on Windows, we must fix it for all
 
          toolchain_tools.append(cc_toolchain.all_files)
 

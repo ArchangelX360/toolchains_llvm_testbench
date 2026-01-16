@@ -5,7 +5,7 @@ bazel_dep(name = "rules_rust", version = "0.68.1")
 
 git_override(
     module_name = "toolchains_llvm",
-    commit = "c8f523d554bbb2e3e8dbf9402f1138d143a8dd62",
+    commit = "9f46c1c62612cef0e17a9e8007ff7b1110846183",
     remote = "https://github.com/ArchangelX360/toolchains_llvm",  # Add Windows support, this is a temporary fork until this is merged https://github.com/bazel-contrib/toolchains_llvm/pull/642
 )
 

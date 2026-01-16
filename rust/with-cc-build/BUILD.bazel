@@ -1,9 +1,10 @@
-package(features = ["static_link_msvcrt"]) # Statically link on Windows when targetting MSVC (equivalent to "-Ctarget-feature=+crt-static" rustc compiler flag)
-
+load("//:defs.bzl", "rust_binary_for_platforms")
 load("@rust_crates//:defs.bzl", "all_crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
-rust_binary(
+package(features = ["static_link_msvcrt"]) # Statically link on Windows when targetting MSVC (equivalent to "-Ctarget-feature=+crt-static" rustc compiler flag)
+
+rust_binary_for_platforms(
     name = "example",
     srcs = glob(["src/**/*.rs"]),
     deps = [] + all_crate_deps(
@@ -12,4 +13,12 @@ rust_binary(
     proc_macro_deps = [] + all_crate_deps(
         proc_macro = True,
     ),
+    platforms = [
+        "//native/platforms:linux-x86_64-musl",
+        "//native/platforms:linux-aarch64-musl",
+        "//native/platforms:macos-x86_64",
+        "//native/platforms:macos-aarch64",
+        "//native/platforms:windows-x86_64",
+        "//native/platforms:windows-aarch64",
+    ],
 )

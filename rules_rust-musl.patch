@@ -1,0 +1,26 @@
+Subject: [PATCH] Default to `musl` (HACK)
+---
+Index: rust/platform/triple_mappings.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/rust/platform/triple_mappings.bzl b/rust/platform/triple_mappings.bzl
+--- a/rust/platform/triple_mappings.bzl	(revision 6cda5f9421bb99cbbe3d13fc48081bff6f22509c)
++++ b/rust/platform/triple_mappings.bzl	(revision 5ac3d48dfdb8c4d7fde3e446f0a74efa287f5b9c)
+@@ -47,6 +47,7 @@
+     "aarch64-linux-android": _support(std = True, host_tools = False),
+     "aarch64-pc-windows-msvc": _support(std = True, host_tools = True),
+     "aarch64-unknown-fuchsia": _support(std = True, host_tools = False),
++    "aarch64-unknown-linux-musl": _support(std = True, host_tools = False),
+     "aarch64-unknown-uefi": _support(std = True, host_tools = False),
+     "arm-unknown-linux-gnueabi": _support(std = True, host_tools = True),
+     "armv7-linux-androideabi": _support(std = True, host_tools = False),
+@@ -69,6 +70,7 @@
+     "x86_64-linux-android": _support(std = True, host_tools = False),
+     "x86_64-unknown-freebsd": _support(std = True, host_tools = True),
+     "x86_64-unknown-fuchsia": _support(std = True, host_tools = False),
++    "x86_64-unknown-linux-musl": _support(std = True, host_tools = False),
+     "x86_64-unknown-none": _support(std = True, host_tools = False),
+     "x86_64-unknown-uefi": _support(std = True, host_tools = False),
+ }

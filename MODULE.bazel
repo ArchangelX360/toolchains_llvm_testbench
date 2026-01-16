@@ -15,6 +15,7 @@ single_version_override(
     patches = [
         "//:rules_rust-lib_include.patch",  # Fix `cc` crate compilation in `build.rs` that calls it
         "//:rules_rust-verbose.patch",  # Increase verbosity
+        "//:rules_rust-musl.patch",
     ],
 )
 

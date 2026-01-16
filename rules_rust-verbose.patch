@@ -16,4 +16,3 @@ diff --git a/rust/private/rustc.bzl b/rust/private/rustc.bzl
 
      if error_format == None:
          error_format = get_error_format(attr, "_error_format")
-ll

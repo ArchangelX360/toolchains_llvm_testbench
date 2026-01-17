@@ -17,9 +17,9 @@ single_version_override(
     module_name = "rules_rust",
     patch_strip = 1,
     patches = [
-        "//:rules_rust-lib_include.patch",  # Fix `cc` crate compilation in `build.rs` that calls it
-        "//:rules_rust-verbose.patch",  # Increase verbosity
-        "//:rules_rust-musl.patch",
+        "//:build/native/rules_rust-lib_include.patch",  # Fix `cc` crate compilation in `build.rs` that calls it
+        "//:build/native/rules_rust-verbose.patch",  # Increase verbosity
+        "//:build/native/rules_rust-musl.patch",  # add musl targets
     ],
 )
 
@@ -99,7 +99,7 @@ llvm.sysroot(
 llvm.extra_target_compatible_with(
     name = "llvm_toolchain",
     constraints = [
-        "@//native/libc:glibc",
+        "@//build/native/libc:glibc",
     ],
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
@@ -108,7 +108,7 @@ register_toolchains("@llvm_toolchain//:all")
 
 toolchains_musl = use_extension("@toolchains_musl//:toolchains_musl.bzl", "toolchains_musl", dev_dependency = True)
 toolchains_musl.config(
-    extra_target_compatible_with = ["@//native/libc:musl"],
+    extra_target_compatible_with = ["@//build/native/libc:musl"],
 )
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
@@ -134,16 +134,12 @@ rust.toolchain(
     versions = [RUST_VERSION],
 )
 
-# This overrides a default rust_repository_set created by rust_register_toolchain.
-# It must be named exactly this.
-# Each exec triple needs one of these calls per target triple it supports.
-# The first call needs all of the attrs, the subsequent calls should only set name, target_triple, and target_compatible_with.
 rust.repository_set(
     name = "rust_linux_x86_64",
     edition = RUST_EDITION,
     exec_triple = "x86_64-unknown-linux-gnu",
     target_compatible_with = [
-        "@//native/libc:glibc",
+        "@//build/native/libc:glibc",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -153,7 +149,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
-        "@//native/libc:glibc",
+        "@//build/native/libc:glibc",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -162,7 +158,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
-        "@//native/libc:musl",
+        "@//build/native/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -171,7 +167,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
-        "@//native/libc:musl",
+        "@//build/native/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -210,51 +206,366 @@ rust.repository_set(
     target_triple = "aarch64-pc-windows-msvc",
 )
 
-# We don't need to register a repository_set for exec_triple == target_triple if we're not customising it in any way:
-# one will get registered by default.
-# But we do for the Linux case above, because we want to add the "@//native/libc:unknown" constraint in that case.
 rust.repository_set(
-    name = "rust_darwin_x86_64",
+    name = "rust_linux_aarch64",
     edition = RUST_EDITION,
-    exec_triple = "x86_64-apple-darwin",
+    exec_triple = "aarch64-unknown-linux-gnu",
     target_compatible_with = [
-        "@//native/libc:musl",
+        "@//build/native/libc:glibc",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
-    target_triple = "x86_64-unknown-linux-musl",
+    target_triple = "x86_64-unknown-linux-gnu",
     versions = [RUST_VERSION],
 )
 rust.repository_set(
-    name = "rust_darwin_x86_64",
+    name = "rust_linux_aarch64",
     target_compatible_with = [
-        "@//native/libc:musl",
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-gnu",
+)
+rust.repository_set(
+    name = "rust_linux_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
     target_triple = "aarch64-unknown-linux-musl",
 )
+rust.repository_set(
+    name = "rust_linux_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_linux_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "x86_64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_linux_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "aarch64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_linux_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "x86_64-pc-windows-msvc",
+)
+rust.repository_set(
+    name = "rust_linux_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "aarch64-pc-windows-msvc",
+)
+
 rust.repository_set(
     name = "rust_darwin_aarch64",
     edition = RUST_EDITION,
     exec_triple = "aarch64-apple-darwin",
     target_compatible_with = [
-        "@//native/libc:musl",
+        "@//build/native/libc:glibc",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
-    target_triple = "x86_64-unknown-linux-musl",
+    target_triple = "x86_64-unknown-linux-gnu",
     versions = [RUST_VERSION],
 )
 rust.repository_set(
     name = "rust_darwin_aarch64",
     target_compatible_with = [
-        "@//native/libc:musl",
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-gnu",
+)
+rust.repository_set(
+    name = "rust_darwin_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
     target_triple = "aarch64-unknown-linux-musl",
 )
+rust.repository_set(
+    name = "rust_darwin_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_darwin_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "x86_64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_darwin_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "aarch64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_darwin_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "x86_64-pc-windows-msvc",
+)
+rust.repository_set(
+    name = "rust_darwin_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "aarch64-pc-windows-msvc",
+)
+
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    edition = RUST_EDITION,
+    exec_triple = "x86_64-apple-darwin",
+    target_compatible_with = [
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-gnu",
+    versions = [RUST_VERSION],
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-gnu",
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "x86_64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "aarch64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "x86_64-pc-windows-msvc",
+)
+rust.repository_set(
+    name = "rust_darwin_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "aarch64-pc-windows-msvc",
+)
+
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    edition = RUST_EDITION,
+    exec_triple = "aarch64-pc-windows-msvc",
+    target_compatible_with = [
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-gnu",
+    versions = [RUST_VERSION],
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-gnu",
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "x86_64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "aarch64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "x86_64-pc-windows-msvc",
+)
+rust.repository_set(
+    name = "rust_windows_aarch64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "aarch64-pc-windows-msvc",
+)
+
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    edition = RUST_EDITION,
+    exec_triple = "x86_64-pc-windows-msvc",
+    target_compatible_with = [
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-gnu",
+    versions = [RUST_VERSION],
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@//build/native/libc:glibc",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-gnu",
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:arm64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "aarch64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@//build/native/libc:musl",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_triple = "x86_64-unknown-linux-musl",
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "x86_64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:macos",
+    ],
+    target_triple = "aarch64-apple-darwin",
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "x86_64-pc-windows-msvc",
+)
+rust.repository_set(
+    name = "rust_windows_x86_64",
+    target_compatible_with = [
+        "@platforms//cpu:arm64",
+        "@platforms//os:windows",
+    ],
+    target_triple = "aarch64-pc-windows-msvc",
+)
+
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")

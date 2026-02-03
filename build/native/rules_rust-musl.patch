@@ -1,4 +1,4 @@
-Subject: [PATCH] Default to `musl` (HACK)
+Subject: [PATCH] Force musl
 ---
 Index: rust/platform/triple_mappings.bzl
 IDEA additional info:
@@ -6,8 +6,8 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/rust/platform/triple_mappings.bzl b/rust/platform/triple_mappings.bzl
---- a/rust/platform/triple_mappings.bzl	(revision 6cda5f9421bb99cbbe3d13fc48081bff6f22509c)
-+++ b/rust/platform/triple_mappings.bzl	(revision 5ac3d48dfdb8c4d7fde3e446f0a74efa287f5b9c)
+--- a/rust/platform/triple_mappings.bzl	(revision 2678bf75a0bfaa9088a98acda8ffb2d4399cbd3d)
++++ b/rust/platform/triple_mappings.bzl	(revision a8860c8f62ed24b612852847c4dc3988138821a4)
 @@ -47,6 +47,7 @@
      "aarch64-linux-android": _support(std = True, host_tools = False),
      "aarch64-pc-windows-msvc": _support(std = True, host_tools = True),

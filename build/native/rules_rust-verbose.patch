@@ -1,4 +1,4 @@
-Subject: [PATCH] lol
+Subject: [PATCH] Verbose Rustc flag
 ---
 Index: rust/private/rustc.bzl
 IDEA additional info:
@@ -6,9 +6,14 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/rust/private/rustc.bzl b/rust/private/rustc.bzl
---- a/rust/private/rustc.bzl	(revision 3239a0ee48c28d474484c321fb6f89f76aac11ae)
-+++ b/rust/private/rustc.bzl	(revision fa66dffb7ec64ca793c906b38d91c4e73240283d)
-@@ -940,6 +940,7 @@
+--- a/rust/private/rustc.bzl	(revision 3a83745b342855896081296bb43359018435433a)
++++ b/rust/private/rustc.bzl	(revision 141c29af88ec18361259cedab54eb8c1ae1a0d0e)
+@@ -1015,10 +1015,11 @@
+     # Rustc arguments
+     rustc_flags = ctx.actions.args()
+     rustc_flags.set_param_file_format("multiline")
+-    rustc_flags.use_param_file("@%s", use_always = False)
++    rustc_flags.use_param_file("@%s", use_always = True)
      rustc_flags.add(crate_info.root)
      rustc_flags.add(crate_info.name, format = "--crate-name=%s")
      rustc_flags.add(crate_info.type, format = "--crate-type=%s")

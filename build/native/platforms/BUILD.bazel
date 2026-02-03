@@ -18,25 +18,25 @@ MACOS_X86_64_CONSTRAINTS = [
 ]
 
 LINUX_AARCH64_MUSL_CONSTRAINTS = [
-    "@//native/libc:musl",
+    "@//build/native/libc:musl",
     "@platforms//cpu:arm64",
     "@platforms//os:linux",
 ]
 
 LINUX_X86_64_MUSL_CONSTRAINTS = [
-    "@//native/libc:musl",
+    "@//build/native/libc:musl",
     "@platforms//cpu:x86_64",
     "@platforms//os:linux",
 ]
 
 LINUX_AARCH64_GLIBC_CONSTRAINTS = [
-    "@//native/libc:glibc",
+    "@//build/native/libc:glibc",
     "@platforms//cpu:arm64",
     "@platforms//os:linux",
 ]
 
 LINUX_X86_64_GLIBC_CONSTRAINTS = [
-    "@//native/libc:glibc",
+    "@//build/native/libc:glibc",
     "@platforms//cpu:x86_64",
     "@platforms//os:linux",
 ]

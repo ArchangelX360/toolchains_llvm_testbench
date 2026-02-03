@@ -9,4 +9,4 @@ zstd = "0.13"
 tar = "0.4.38"
 
 [patch.crates-io]
-cc = { git = "https://github.com/ArchangelX360/cc-rs", rev = "b3932dfa37304934df5e7cd2c52dbc8a5c6721b0" }
+cc = { git = "https://github.com/ArchangelX360/cc-rs", rev = "fb0318ba4567c95cdf280399c57f3b09ebdcb45f" }

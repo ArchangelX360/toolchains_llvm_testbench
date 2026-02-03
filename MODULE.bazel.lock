@@ -220,7 +220,7 @@
   "moduleExtensions": {
     "//:defs.bzl%local_archive_ext": {
       "general": {
-        "bzlTransitiveDigest": "ct/R0vJmIVaj/EXx8eNk1PgAsOD3bIqqPa3cCk/YaEo=",
+        "bzlTransitiveDigest": "vLjb79AYGfDj5Oz6/Pi956Cg8QqKdLZy+hW6iQLqHd8=",
         "usagesDigest": "ZJkI3U02AMI1FRjJlTpUJwo264wmttKho8Wb7BR38gw=",
         "recordedInputs": [
           "REPO_MAPPING:, ",

@@ -1,5 +1,5 @@
 {
-  "checksum": "af31453ff079dba525aefa11dca6e13e758bf225f713a21ea7e42e681256fd60",
+  "checksum": "6caa801282db19e3f428df4616e28d111b74aa03c5269a054038d5310708ea3c",
   "crates": {
     "bitflags 2.10.0": {
       "name": "bitflags",
@@ -54,7 +54,7 @@
         "Git": {
           "remote": "https://github.com/ArchangelX360/cc-rs",
           "commitish": {
-            "Rev": "b3932dfa37304934df5e7cd2c52dbc8a5c6721b0"
+            "Rev": "fb0318ba4567c95cdf280399c57f3b09ebdcb45f"
           }
         }
       },
@@ -111,12 +111,6 @@
                 "target": "libc"
               }
             ],
-            "aarch64-unknown-linux-musl": [
-              {
-                "id": "libc 0.2.179",
-                "target": "libc"
-              }
-            ],
             "x86_64-apple-darwin": [
               {
                 "id": "libc 0.2.179",
@@ -124,12 +118,6 @@
               }
             ],
             "x86_64-unknown-linux-gnu": [
-              {
-                "id": "libc 0.2.179",
-                "target": "libc"
-              }
-            ],
-            "x86_64-unknown-linux-musl": [
               {
                 "id": "libc 0.2.179",
                 "target": "libc"
@@ -335,7 +323,7 @@
         "Git": {
           "remote": "https://github.com/ArchangelX360/cc-rs",
           "commitish": {
-            "Rev": "b3932dfa37304934df5e7cd2c52dbc8a5c6721b0"
+            "Rev": "fb0318ba4567c95cdf280399c57f3b09ebdcb45f"
           },
           "strip_prefix": "find-msvc-tools"
         }
@@ -1118,12 +1106,6 @@
                 "target": "xattr"
               }
             ],
-            "aarch64-unknown-linux-musl": [
-              {
-                "id": "xattr 1.6.1",
-                "target": "xattr"
-              }
-            ],
             "cfg(unix)": [
               {
                 "id": "libc 0.2.179",
@@ -1137,12 +1119,6 @@
               }
             ],
             "x86_64-unknown-linux-gnu": [
-              {
-                "id": "xattr 1.6.1",
-                "target": "xattr"
-              }
-            ],
-            "x86_64-unknown-linux-musl": [
               {
                 "id": "xattr 1.6.1",
                 "target": "xattr"
@@ -2442,24 +2418,17 @@
     "aarch64-unknown-linux-gnu": [
       "aarch64-unknown-linux-gnu"
     ],
-    "aarch64-unknown-linux-musl": [
-      "aarch64-unknown-linux-musl"
-    ],
     "cfg(all(any(target_arch = \"x86_64\", target_arch = \"arm64ec\"), target_env = \"msvc\", not(windows_raw_dylib)))": [
       "x86_64-pc-windows-msvc"
     ],
     "cfg(all(any(target_os = \"linux\", target_os = \"android\"), any(rustix_use_libc, miri, not(all(target_os = \"linux\", any(target_endian = \"little\", any(target_arch = \"s390x\", target_arch = \"powerpc\")), any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc\"), all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"s390x\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\")))))))": [],
     "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))": [
       "aarch64-unknown-linux-gnu",
-      "aarch64-unknown-linux-musl",
-      "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-linux-musl"
+      "x86_64-unknown-linux-gnu"
     ],
     "cfg(all(not(rustix_use_libc), not(miri), target_os = \"linux\", any(target_endian = \"little\", any(target_arch = \"s390x\", target_arch = \"powerpc\")), any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc\"), all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"s390x\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\"))))": [
       "aarch64-unknown-linux-gnu",
-      "aarch64-unknown-linux-musl",
-      "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-linux-musl"
+      "x86_64-unknown-linux-gnu"
     ],
     "cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = \"linux\", any(target_endian = \"little\", any(target_arch = \"s390x\", target_arch = \"powerpc\")), any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc\"), all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"s390x\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\")))))))": [
       "aarch64-apple-darwin",
@@ -2478,10 +2447,8 @@
     "cfg(any(target_os = \"android\", target_os = \"linux\", target_os = \"macos\", target_os = \"hurd\"))": [
       "aarch64-apple-darwin",
       "aarch64-unknown-linux-gnu",
-      "aarch64-unknown-linux-musl",
       "x86_64-apple-darwin",
-      "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-linux-musl"
+      "x86_64-unknown-linux-gnu"
     ],
     "cfg(any(target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"hurd\", target_os = \"illumos\", target_os = \"cygwin\", all(target_os = \"horizon\", target_arch = \"arm\")))": [],
     "cfg(any(target_os = \"freebsd\", target_os = \"netbsd\"))": [],
@@ -2500,10 +2467,8 @@
     "cfg(unix)": [
       "aarch64-apple-darwin",
       "aarch64-unknown-linux-gnu",
-      "aarch64-unknown-linux-musl",
       "x86_64-apple-darwin",
-      "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-linux-musl"
+      "x86_64-unknown-linux-gnu"
     ],
     "cfg(windows)": [
       "aarch64-pc-windows-msvc",
@@ -2520,9 +2485,6 @@
     ],
     "x86_64-unknown-linux-gnu": [
       "x86_64-unknown-linux-gnu"
-    ],
-    "x86_64-unknown-linux-musl": [
-      "x86_64-unknown-linux-musl"
     ]
   },
   "direct_deps": [

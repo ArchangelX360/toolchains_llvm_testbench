@@ -106,10 +106,10 @@ use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
 
 register_toolchains("@llvm_toolchain//:all")
 
-toolchains_musl = use_extension("@toolchains_musl//:toolchains_musl.bzl", "toolchains_musl", dev_dependency = True)
-toolchains_musl.config(
-    extra_target_compatible_with = ["@//build/native/libc:musl"],
-)
+# toolchains_musl = use_extension("@toolchains_musl//:toolchains_musl.bzl", "toolchains_musl", dev_dependency = True)
+# toolchains_musl.config(
+#     extra_target_compatible_with = ["@//build/native/libc:musl"],
+# )
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 
@@ -120,8 +120,8 @@ RUST_TARGETS = [
     "x86_64-pc-windows-msvc",
     "aarch64-unknown-linux-gnu",
     "x86_64-unknown-linux-gnu",
-    "aarch64-unknown-linux-musl",
-    "x86_64-unknown-linux-musl",
+#     "aarch64-unknown-linux-musl",
+#     "x86_64-unknown-linux-musl",
 ]
 
 RUST_EDITION = "2021"
@@ -155,24 +155,24 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
+# rust.repository_set(
+#     name = "rust_linux_x86_64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:arm64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "aarch64-unknown-linux-musl",
+# )
+# rust.repository_set(
+#     name = "rust_linux_x86_64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:x86_64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "x86_64-unknown-linux-musl",
+# )
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
@@ -227,24 +227,24 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
+# rust.repository_set(
+#     name = "rust_linux_aarch64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:arm64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "aarch64-unknown-linux-musl",
+# )
+# rust.repository_set(
+#     name = "rust_linux_aarch64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:x86_64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "x86_64-unknown-linux-musl",
+# )
 rust.repository_set(
     name = "rust_linux_aarch64",
     target_compatible_with = [
@@ -299,24 +299,24 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
+# rust.repository_set(
+#     name = "rust_darwin_aarch64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:arm64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "aarch64-unknown-linux-musl",
+# )
+# rust.repository_set(
+#     name = "rust_darwin_aarch64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:x86_64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "x86_64-unknown-linux-musl",
+# )
 rust.repository_set(
     name = "rust_darwin_aarch64",
     target_compatible_with = [
@@ -371,24 +371,24 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
+# rust.repository_set(
+#     name = "rust_darwin_x86_64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:arm64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "aarch64-unknown-linux-musl",
+# )
+# rust.repository_set(
+#     name = "rust_darwin_x86_64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:x86_64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "x86_64-unknown-linux-musl",
+# )
 rust.repository_set(
     name = "rust_darwin_x86_64",
     target_compatible_with = [
@@ -443,24 +443,24 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
+# rust.repository_set(
+#     name = "rust_windows_aarch64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:arm64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "aarch64-unknown-linux-musl",
+# )
+# rust.repository_set(
+#     name = "rust_windows_aarch64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:x86_64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "x86_64-unknown-linux-musl",
+# )
 rust.repository_set(
     name = "rust_windows_aarch64",
     target_compatible_with = [
@@ -515,24 +515,24 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@//build/native/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
+# rust.repository_set(
+#     name = "rust_windows_x86_64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:arm64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "aarch64-unknown-linux-musl",
+# )
+# rust.repository_set(
+#     name = "rust_windows_x86_64",
+#     target_compatible_with = [
+#         "@//build/native/libc:musl",
+#         "@platforms//cpu:x86_64",
+#         "@platforms//os:linux",
+#     ],
+#     target_triple = "x86_64-unknown-linux-musl",
+# )
 rust.repository_set(
     name = "rust_windows_x86_64",
     target_compatible_with = [

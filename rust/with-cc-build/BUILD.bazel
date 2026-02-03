@@ -14,11 +14,11 @@ rust_binary_for_platforms(
         proc_macro = True,
     ),
     platforms = [
-        "//native/platforms:linux-x86_64-musl",
-        "//native/platforms:linux-aarch64-musl",
-        "//native/platforms:macos-x86_64",
-        "//native/platforms:macos-aarch64",
-        "//native/platforms:windows-x86_64",
-        "//native/platforms:windows-aarch64",
+        "//build/native/platforms:linux-x86_64-musl",
+        "//build/native/platforms:linux-aarch64-musl",
+        "//build/native/platforms:macos-x86_64",
+        "//build/native/platforms:macos-aarch64",
+        "//build/native/platforms:windows-x86_64",
+        "//build/native/platforms:windows-aarch64",
     ],
 )

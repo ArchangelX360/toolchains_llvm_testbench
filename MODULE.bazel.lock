@@ -220,10 +220,11 @@
   "moduleExtensions": {
     "//:defs.bzl%local_archive_ext": {
       "general": {
-        "bzlTransitiveDigest": "vLjb79AYGfDj5Oz6/Pi956Cg8QqKdLZy+hW6iQLqHd8=",
-        "usagesDigest": "ZJkI3U02AMI1FRjJlTpUJwo264wmttKho8Wb7BR38gw=",
+        "bzlTransitiveDigest": "yveSrAVRC5wW65zkKDSQZxbZV2LZkTvYy4iAbojH3S0=",
+        "usagesDigest": "5MRI6aee8i6w4HPzE6ubZYYRICN1fHRLdke92+5Sv78=",
         "recordedInputs": [
           "REPO_MAPPING:, ",
+          "REPO_MAPPING:,bazel_tools bazel_tools",
           "REPO_MAPPING:,rules_rust rules_rust+",
           "REPO_MAPPING:rules_cc+,bazel_skylib bazel_skylib+",
           "REPO_MAPPING:rules_cc+,bazel_tools bazel_tools",
@@ -247,14 +248,14 @@
           "sysroot-windows_aarch64": {
             "repoRuleId": "@@//:defs.bzl%local_archive",
             "attributes": {
-              "src": "@@//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-6E92FED8A6D11F344CEB8F5FF4CC5F31.tar.gz",
+              "src": "@@//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
               "build_file": "@@//sysroots:BUILD.windows_aarch64"
             }
           },
           "sysroot-windows_x86_64": {
             "repoRuleId": "@@//:defs.bzl%local_archive",
             "attributes": {
-              "src": "@@//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-6E92FED8A6D11F344CEB8F5FF4CC5F31.tar.gz",
+              "src": "@@//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
               "build_file": "@@//sysroots:BUILD.windows_x86_64"
             }
           },

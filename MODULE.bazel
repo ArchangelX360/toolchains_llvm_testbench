@@ -33,13 +33,13 @@ local_archive_ext.archive(
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-windows_aarch64",
-    src = "//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-6E92FED8A6D11F344CEB8F5FF4CC5F31.tar.gz",
+    src = "//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
     build_file = "@//sysroots:BUILD.windows_aarch64",
 )
 local_archive_ext.archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-windows_x86_64",
-    src = "//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-6E92FED8A6D11F344CEB8F5FF4CC5F31.tar.gz",
+    src = "//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
     build_file = "@//sysroots:BUILD.windows_x86_64",
 )
 local_archive_ext.archive(

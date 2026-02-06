@@ -31,7 +31,8 @@ windows_sysroot_transformations = {
     "**/*.Lib": "lowercase",  # Create lowercase duplicates of .Lib files
 }
 
-crossplatform_local_archive = use_repo_rule("//:defs.bzl", "crossplatform_local_archive", "local_archive")
+crossplatform_local_archive = use_repo_rule("//:defs.bzl", "crossplatform_local_archive")
+local_archive = use_repo_rule("//:defs.bzl", "local_archive")
 
 local_archive(
     # see `sysroots/README.md` to understand how this sysroot is built

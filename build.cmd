@@ -5,13 +5,13 @@ GOTO :CMDSCRIPT
 
 set -eux
 
+bazel build //rust/... --keep_going
 bazel build //cc/... --platforms=//build/native/platforms:linux-x86_64-glibc || echo "failed on linux-x86_64 (cc)"
 bazel build //cc/... --platforms=//build/native/platforms:linux-aarch64-glibc || echo "failed on linux-aarch64 (cc)"
 bazel build //cc/... --platforms=//build/native/platforms:macos-x86_64 || echo "failed on macos-x86_64 (cc)"
 bazel build //cc/... --platforms=//build/native/platforms:macos-aarch64 || echo "failed on macos-aarch64 (cc)"
 bazel build //cc/... --platforms=//build/native/platforms:windows-x86_64 || echo "failed on windows-x86_64 (cc)"
 bazel build //cc/... --platforms=//build/native/platforms:windows-aarch64 || echo "failed on windows-aarch64 (cc)"
-bazel build //rust/... --keep_going
 exit 0
 :CMDSCRIPT
 

@@ -1,5 +1,4 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "get_auth")
 
 def _local_archive_impl(repository_ctx):
     repository_ctx.extract(repository_ctx.attr.src)
@@ -11,32 +10,6 @@ local_archive = repository_rule(
         "build_file": attr.label(mandatory = True, allow_single_file = True),
     },
     implementation = _local_archive_impl,
-)
-
-# Module extension for Bzlmod
-
-def _local_archive_extension_impl(module_ctx):
-    for mod in module_ctx.modules:
-        for archive in mod.tags.archive:
-            local_archive(
-                name = archive.name,
-                src = archive.src,
-                build_file = archive.build_file,
-            )
-
-_archive_tag = tag_class(
-    attrs = {
-        "name": attr.string(mandatory = True),
-        "src": attr.label(mandatory = True, allow_single_file = True),
-        "build_file": attr.label(mandatory = True, allow_single_file = True),
-    },
-)
-
-local_archive_ext = module_extension(
-    implementation = _local_archive_extension_impl,
-    tag_classes = {
-        "archive": _archive_tag,
-    },
 )
 
 def _rust_binary_for_platforms_impl(name, visibility, platforms, **kwargs):
@@ -58,13 +31,8 @@ rust_binary_for_platforms = macro(
     implementation = _rust_binary_for_platforms_impl,
 )
 
-def _crossplatform_http_archive_impl(repository_ctx):
-    repository_ctx.download_and_extract(
-        url = repository_ctx.attr.url,
-        sha256 = repository_ctx.attr.sha256,
-        stripPrefix = repository_ctx.attr.strip_prefix,
-        auth = get_auth(repository_ctx, [repository_ctx.attr.url]),
-    )
+def _crossplatform_local_archive_impl(repository_ctx):
+    repository_ctx.extract(repository_ctx.attr.src)
 
     # Detect OS and determine if transformations should be skipped
     os_name = repository_ctx.os.name.lower()
@@ -93,36 +61,14 @@ def _crossplatform_http_archive_impl(repository_ctx):
                 result.stderr,
             ))
 
-    if repository_ctx.attr.build_file:
-        repository_ctx.file(
-            "BUILD.bazel",
-            repository_ctx.read(repository_ctx.attr.build_file),
-        )
-    elif repository_ctx.attr.build_file_content:
-        repository_ctx.file("BUILD.bazel", repository_ctx.attr.build_file_content)
-    else:
-        fail("Either build_file or build_file_content must be provided")
+    repository_ctx.file("BUILD.bazel", repository_ctx.read(repository_ctx.attr.build_file))
 
-crossplatform_http_archive = repository_rule(
-    implementation = _crossplatform_http_archive_impl,
+crossplatform_local_archive = repository_rule(
+    implementation = _crossplatform_local_archive_impl,
     attrs = {
-        "url": attr.string(
-            mandatory = True,
-            doc = "URL of the archive to download",
-        ),
-        "sha256": attr.string(
-            mandatory = True,
-            doc = "Expected SHA256 hash of the archive",
-        ),
-        "strip_prefix": attr.string(
-            default = "",
-            doc = "Directory prefix to strip from extracted files",
-        ),
+       "src": attr.label(mandatory = True, allow_single_file = True),
         "build_file": attr.label(
             doc = "Label of the BUILD file template to use",
-        ),
-        "build_file_content": attr.string(
-            doc = "Content of the BUILD file (alternative to build_file)",
         ),
         "transformations": attr.string_dict(
             default = {},
@@ -141,7 +87,7 @@ crossplatform_http_archive = repository_rule(
         ),
     },
     doc = """
-    Downloads and extracts an archive, optionally transforming and duplicating files for cross-platform use-cases.
+    Extracts a local archive, optionally transforming and duplicating files for cross-platform use-cases.
 
     This rule provides hermetic, cross-platform support for transforming and duplicating
     archive contents, resolving case-sensitivity issues when building on
@@ -155,9 +101,7 @@ crossplatform_http_archive = repository_rule(
     Example:
         crossplatform_http_archive(
             name = "my_archive",
-            url = "https://example.com/archive.zip",
-            sha256 = "abc123...",
-            strip_prefix = "archive-1.0/",
+            src = "//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
             build_file = "@//path:BUILD.template",
             transformations = {
                 "include/driverspecs.h": "include/DriverSpecs.h",  # Exact file copy

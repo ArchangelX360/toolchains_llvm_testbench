@@ -23,44 +23,51 @@ single_version_override(
     ],
 )
 
-local_archive_ext = use_extension("//:defs.bzl", "local_archive_ext")
-local_archive_ext.archive(
+windows_sysroot_transformations = {
+    "include/driverspecs.h": "include/DriverSpecs.h",  # Linux respects case, and some of our source files in transitive dependencies mention `DriverSpecs.h` and not `driverspecs.h`
+    "include/specstrings.h": "include/SpecStrings.h",  # Linux respects case, and some of our source files in transitive dependencies mention `SpecStrings.h` and not `specstrings.h`
+    "**/*.h": "lowercase",  # Create lowercase duplicates of .h files
+    "**/*.lib": "lowercase",  # Create lowercase duplicates of .lib files
+    "**/*.Lib": "lowercase",  # Create lowercase duplicates of .Lib files
+}
+
+crossplatform_local_archive = use_repo_rule("//:defs.bzl", "crossplatform_local_archive", "local_archive")
+
+local_archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-darwin",
     src = "//sysroots:sysroot-macos-SDK_15.5-5185e391ddaec47fc3c03b0bd85082b1.tar.gz",
     build_file = "@//sysroots:BUILD.darwin",
 )
-local_archive_ext.archive(
+
+crossplatform_local_archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-windows_aarch64",
     src = "//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
     build_file = "@//sysroots:BUILD.windows_aarch64",
+    transformations = windows_sysroot_transformations,
 )
-local_archive_ext.archive(
+
+crossplatform_local_archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-windows_x86_64",
     src = "//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
     build_file = "@//sysroots:BUILD.windows_x86_64",
+    transformations = windows_sysroot_transformations,
 )
-local_archive_ext.archive(
+
+local_archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-linux-aarch64",
     src = "//sysroots:sysroot-linux_aarch64_3.3.0.65682.tar.zst",
     build_file = "@//sysroots:BUILD.linux_aarch64",
 )
-local_archive_ext.archive(
+
+local_archive(
     # see `sysroots/README.md` to understand how this sysroot is built
     name = "sysroot-linux-x86_64",
     src = "//sysroots:sysroot-linux_x86_64_3.3.0.65682.tar.zst",
     build_file = "@//sysroots:BUILD.linux_x86_64",
-)
-use_repo(
-    local_archive_ext,
-    "sysroot-darwin",
-    "sysroot-linux-aarch64",
-    "sysroot-linux-x86_64",
-    "sysroot-windows_aarch64",
-    "sysroot-windows_x86_64",
 )
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
@@ -120,8 +127,8 @@ RUST_TARGETS = [
     "x86_64-pc-windows-msvc",
     "aarch64-unknown-linux-gnu",
     "x86_64-unknown-linux-gnu",
-#     "aarch64-unknown-linux-musl",
-#     "x86_64-unknown-linux-musl",
+    #     "aarch64-unknown-linux-musl",
+    #     "x86_64-unknown-linux-musl",
 ]
 
 RUST_EDITION = "2021"
@@ -133,7 +140,6 @@ rust.toolchain(
     extra_target_triples = RUST_TARGETS,
     versions = [RUST_VERSION],
 )
-
 rust.repository_set(
     name = "rust_linux_x86_64",
     edition = RUST_EDITION,
@@ -155,6 +161,7 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
+
 # rust.repository_set(
 #     name = "rust_linux_x86_64",
 #     target_compatible_with = [
@@ -205,7 +212,6 @@ rust.repository_set(
     ],
     target_triple = "aarch64-pc-windows-msvc",
 )
-
 rust.repository_set(
     name = "rust_linux_aarch64",
     edition = RUST_EDITION,
@@ -227,6 +233,7 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
+
 # rust.repository_set(
 #     name = "rust_linux_aarch64",
 #     target_compatible_with = [
@@ -277,7 +284,6 @@ rust.repository_set(
     ],
     target_triple = "aarch64-pc-windows-msvc",
 )
-
 rust.repository_set(
     name = "rust_darwin_aarch64",
     edition = RUST_EDITION,
@@ -299,6 +305,7 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
+
 # rust.repository_set(
 #     name = "rust_darwin_aarch64",
 #     target_compatible_with = [
@@ -349,7 +356,6 @@ rust.repository_set(
     ],
     target_triple = "aarch64-pc-windows-msvc",
 )
-
 rust.repository_set(
     name = "rust_darwin_x86_64",
     edition = RUST_EDITION,
@@ -371,6 +377,7 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
+
 # rust.repository_set(
 #     name = "rust_darwin_x86_64",
 #     target_compatible_with = [
@@ -421,7 +428,6 @@ rust.repository_set(
     ],
     target_triple = "aarch64-pc-windows-msvc",
 )
-
 rust.repository_set(
     name = "rust_windows_aarch64",
     edition = RUST_EDITION,
@@ -443,6 +449,7 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
+
 # rust.repository_set(
 #     name = "rust_windows_aarch64",
 #     target_compatible_with = [
@@ -493,7 +500,6 @@ rust.repository_set(
     ],
     target_triple = "aarch64-pc-windows-msvc",
 )
-
 rust.repository_set(
     name = "rust_windows_x86_64",
     edition = RUST_EDITION,
@@ -515,6 +521,7 @@ rust.repository_set(
     ],
     target_triple = "aarch64-unknown-linux-gnu",
 )
+
 # rust.repository_set(
 #     name = "rust_windows_x86_64",
 #     target_compatible_with = [
@@ -565,7 +572,6 @@ rust.repository_set(
     ],
     target_triple = "aarch64-pc-windows-msvc",
 )
-
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")

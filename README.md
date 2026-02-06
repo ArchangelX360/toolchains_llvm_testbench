@@ -12,6 +12,15 @@ x86_64 and aarch64 architectures):
 ./build.cmd
 ```
 
+## Cross-compilation specific patches
+
+- `rules_rust` pwd patches `build/native/rules_rust-pwd.patch`
+- Windows sysroots are wired using `crossplatform_local_archive` for Linux cross-compilation to work
+- `cc-rs` crate is patched to force using `clang-cl`, and also includes also a few patches for `clang-cl` to work which
+  we are trying to upstream
+    - https://github.com/rust-lang/cc-rs/pull/1670
+    - https://github.com/rust-lang/cc-rs/pull/1671
+
 ## Tested on
 
 | rules         | host                        | target                      | outcome | additional information |

@@ -1,5 +1,5 @@
 {
-  "checksum": "6caa801282db19e3f428df4616e28d111b74aa03c5269a054038d5310708ea3c",
+  "checksum": "0184c4753f73b26dad1cf2420e37a0b2ed083e3913c43b262b1958c995ad44ff",
   "crates": {
     "bitflags 2.10.0": {
       "name": "bitflags",
@@ -54,7 +54,7 @@
         "Git": {
           "remote": "https://github.com/ArchangelX360/cc-rs",
           "commitish": {
-            "Rev": "fb0318ba4567c95cdf280399c57f3b09ebdcb45f"
+            "Rev": "c7b0c2ef7f44617f1d0395966a0ea00caf9aa12b"
           }
         }
       },
@@ -323,7 +323,7 @@
         "Git": {
           "remote": "https://github.com/ArchangelX360/cc-rs",
           "commitish": {
-            "Rev": "fb0318ba4567c95cdf280399c57f3b09ebdcb45f"
+            "Rev": "c7b0c2ef7f44617f1d0395966a0ea00caf9aa12b"
           },
           "strip_prefix": "find-msvc-tools"
         }

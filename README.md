@@ -14,6 +14,7 @@ x86_64 and aarch64 architectures):
 
 ## Cross-compilation specific patches
 
+- on Windows, Developer Mode should be enabled, otherwise `windows.0.53.0.lib` is not found, because `"/LIBPATH:C:\\tmp\\testbench\\4gcvj3vr\\execroot\\_main\\bazel-out/arm64_windows-fastbuild-ST-532a4266b501/bin/external/rules_rust++crate+rust_crates__windows_aarch64_msvc-0.53.1/_bs.cargo_runfiles/rules_rust++crate+rust_crates__windows_aarch64_msvc-0.53.1/lib"` does not get a symlink to the lib
 - `rules_rust` pwd patches `build/native/rules_rust-pwd.patch`
 - Windows sysroots are wired using `crossplatform_local_archive` for Linux cross-compilation to work
 - `cc-rs` crate is patched to force using `clang-cl`, and also includes also a few patches for `clang-cl` to work which
@@ -49,16 +50,16 @@ x86_64 and aarch64 architectures):
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-unknown-linux-gnu`  | ✅       |                        |
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `aarch64-pc-windows-msvc`   | ✅       |                        |
 | `rules_rust`* | `aarch64-unknown-linux-gnu` | `x86_64-pc-windows-msvc`    | ✅       |                        |
-| `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [2]                    |
-| `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [2]                    |
-| `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | ✅       |                        |
+| `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | ✅       |                        |
+| `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | ✅       |                        |
+| `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | 🔴      | [2]                    |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-unknown-linux-gnu`  | ✅       |                        |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `aarch64-pc-windows-msvc`   | ✅       |                        |
 | `rules_cc`    | `aarch64-pc-windows-msvc`   | `x86_64-pc-windows-msvc`    | 🔴      | [1]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | 🔴      | [2]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | 🔴      | [2]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | 🔴      | [4]                    |
-| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-unknown-linux-gnu`  | 🔴      | [4]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-apple-darwin`      | ✅       |                        |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-apple-darwin`       | ✅       |                        |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-unknown-linux-gnu` | 🔴      | [2]                    |
+| `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-unknown-linux-gnu`  | 🔴      | [2]                    |
 | `rules_rust`* | `aarch64-pc-windows-msvc`   | `aarch64-pc-windows-msvc`   | ✅       |                        |
 | `rules_rust`* | `aarch64-pc-windows-msvc`   | `x86_64-pc-windows-msvc`    | ✅       |                        |
 
@@ -68,20 +69,7 @@ x86_64 and aarch64 architectures):
 [1]:
 `lld-link: error: bazel-out/darwin_arm64-fastbuild/bin/cc/clang-rt/_objs/example/main.obj: machine type arm64 conflicts with x64`
 
-[2]:
-
-```
-ld64.lld: error: unknown argument '--build-id=md5'
-ld64.lld: error: unknown argument '--hash-style=gnu'
-ld64.lld: error: unknown argument '-z'
-ld64.lld: error: unknown argument '-z'
-```
-
-[3]: `lld-link: error: could not open 'kernel32.lib': No such file or directory`, potential lead sysroot path seems
-incorrect `/LIBPATH:external/+local_archive_ext+sysroot-windows_aarch64//Lib
-`
-
-[4]: Permission denied failures
+[2]: Permission denied failures
 
 ```
 ERROR: C:/users/titouan.bion/developer_windows/toolchains_llvm_testbench/rust/with-cc-build/BUILD.bazel:6:12: Compiling
@@ -115,5 +103,12 @@ denied␍
 ld.lld: error: cannot open external/+local_archive_ext+sysroot-linux-aarch64/usr/lib\librt.so: permission denied␍
 ld.lld: error: cannot open external/+local_archive_ext+sysroot-linux-aarch64/usr/lib\libdl.so: permission denied␍
 clang: error: linker command failed with exit code 1 (use -v to see invocation)␍
-
+```
+OR
+```
+ERROR: C:/users/titouan.bion/developer/toolchains_llvm_testbench/cc/clang-rt/BUILD.bazel:3:10: Linking cc/clang-rt/example failed: (Exit 1): clang.exe failed: error executing CppLink command (from target //cc/clang-rt:example) C:\tmp\testbench\4gcvj3vr\external\toolchains_llvm++llvm+llvm_toolchain_llvm\bin\clang.exe @bazel-out/arm64_windows-fastbuild/bin/cc/clang-rt/example-0.params
+ld.lld: error: cannot open external/+_repo_rules2+sysroot-linux-aarch64/usr/lib\libm.so: permission denied
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+Target //cc/clang-rt:example failed to build
+Use --verbose_failures to see the command lines of failed build steps.
 ```

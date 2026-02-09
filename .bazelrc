@@ -1,1 +1,3 @@
 # common --repo_env CARGO_BAZEL_GENERATOR_URL="https://github.com/bazelbuild/rules_rust/releases/download/0.68.1/cargo-bazel-aarch64-pc-windows-msvc.exe" --repo_env CARGO_BAZEL_GENERATOR_SHA256="3ad91f1aeecb04ff493f90c7d47dfc45e0393e5ac0965ee2668ed2cc92e83af9"
+startup:windows --output_user_root=C:/tmp/testbench # workaround `rules_rust` path length issues
+common:windows --disk_cache=C:/tmp/testbenchc # workaround `rules_rust` path length issues

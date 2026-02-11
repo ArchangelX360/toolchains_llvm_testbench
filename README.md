@@ -21,6 +21,7 @@ x86_64 and aarch64 architectures):
   we are trying to upstream
     - https://github.com/rust-lang/cc-rs/pull/1670
     - https://github.com/rust-lang/cc-rs/pull/1671
+- Patch `rules_cc` with `build/native/rules_cc-compiler_flags.patch` to ensure all compiler flags are propagated when creating the `cc_toolchain_config` for Windows in our LLVM toolchain MSVC patch
 
 ## Tested on
 

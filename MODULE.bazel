@@ -22,6 +22,13 @@ single_version_override(
         "//:build/native/rules_rust-verbose.patch",  # Increase verbosity
     ],
 )
+single_version_override(
+    module_name = "rules_cc",
+    patch_strip = 1,
+    patches = [
+        "//:build/native/rules_cc-compiler_flags.patch",  # Ensure all default flags are propagated when using `windows_cc_toolchain_config.bzl`'s cc_toolchain_config
+    ],
+)
 
 windows_sysroot_transformations = {
     "include/driverspecs.h": "include/DriverSpecs.h",  # Linux respects case, and some of our source files in transitive dependencies mention `DriverSpecs.h` and not `driverspecs.h`

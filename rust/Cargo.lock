@@ -11,7 +11,7 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 [[package]]
 name = "cc"
 version = "1.2.45"
-source = "git+https://github.com/ArchangelX360/cc-rs?rev=c7b0c2ef7f44617f1d0395966a0ea00caf9aa12b#c7b0c2ef7f44617f1d0395966a0ea00caf9aa12b"
+source = "git+https://github.com/ArchangelX360/cc-rs?rev=8d586c94e2bcbcb79c57271cb1426601a88d3fc4#8d586c94e2bcbcb79c57271cb1426601a88d3fc4"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -50,7 +50,7 @@ dependencies = [
 [[package]]
 name = "find-msvc-tools"
 version = "0.1.4"
-source = "git+https://github.com/ArchangelX360/cc-rs?rev=c7b0c2ef7f44617f1d0395966a0ea00caf9aa12b#c7b0c2ef7f44617f1d0395966a0ea00caf9aa12b"
+source = "git+https://github.com/ArchangelX360/cc-rs?rev=8d586c94e2bcbcb79c57271cb1426601a88d3fc4#8d586c94e2bcbcb79c57271cb1426601a88d3fc4"
 
 [[package]]
 name = "getrandom"

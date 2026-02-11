@@ -9,7 +9,7 @@ bazel_dep(name = "toolchains_musl", version = "0.1.27", dev_dependency = True)
 
 git_override(
     module_name = "toolchains_llvm",
-    commit = "35b69adec2e9911446ba390599c00f50e8c96b19",
+    commit = "27c0bc7378a3f0bce997f582b5d94ec84af606c7",
     remote = "https://github.com/ArchangelX360/toolchains_llvm",  # Add Windows support, this is a temporary fork until this is merged https://github.com/bazel-contrib/toolchains_llvm/pull/642
 )
 

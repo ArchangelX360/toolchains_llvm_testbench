@@ -1,5 +1,5 @@
 {
-  "checksum": "a8ecf637f9a730de36e0ecef5e2b64822ec42977b96b6dac9aab6bd8df6a7b50",
+  "checksum": "ac457e28a05bda6783b3e92c216e4ff266fc0a199cb8a633136c6dd206f4c0c9",
   "crates": {
     "bitflags 2.10.0": {
       "name": "bitflags",
@@ -46,15 +46,15 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "cc 1.2.45": {
+    "cc 1.2.55": {
       "name": "cc",
-      "version": "1.2.45",
+      "version": "1.2.55",
       "package_url": "https://github.com/rust-lang/cc-rs",
       "repository": {
         "Git": {
           "remote": "https://github.com/ArchangelX360/cc-rs",
           "commitish": {
-            "Rev": "8d586c94e2bcbcb79c57271cb1426601a88d3fc4"
+            "Rev": "5ef66da5dacc4bfdfa3583aa28608514370cf1b1"
           }
         }
       },
@@ -86,7 +86,7 @@
         "deps": {
           "common": [
             {
-              "id": "find-msvc-tools 0.1.4",
+              "id": "find-msvc-tools 0.1.9",
               "target": "find_msvc_tools"
             },
             {
@@ -126,7 +126,7 @@
           }
         },
         "edition": "2018",
-        "version": "1.2.45"
+        "version": "1.2.55"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -315,15 +315,15 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "find-msvc-tools 0.1.4": {
+    "find-msvc-tools 0.1.9": {
       "name": "find-msvc-tools",
-      "version": "0.1.4",
+      "version": "0.1.9",
       "package_url": "https://github.com/rust-lang/cc-rs",
       "repository": {
         "Git": {
           "remote": "https://github.com/ArchangelX360/cc-rs",
           "commitish": {
-            "Rev": "8d586c94e2bcbcb79c57271cb1426601a88d3fc4"
+            "Rev": "5ef66da5dacc4bfdfa3583aa28608514370cf1b1"
           },
           "strip_prefix": "find-msvc-tools"
         }
@@ -348,7 +348,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "0.1.4"
+        "version": "0.1.9"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -2383,7 +2383,7 @@
         "deps": {
           "common": [
             {
-              "id": "cc 1.2.45",
+              "id": "cc 1.2.55",
               "target": "cc"
             },
             {

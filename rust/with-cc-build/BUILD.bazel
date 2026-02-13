@@ -8,8 +8,8 @@ rust_binary_for_platforms(
     name = "example",
     srcs = glob(["src/**/*.rs"]),
     platforms = [
-        # "//build/native/platforms:linux-x86_64-musl",
-        # "//build/native/platforms:linux-aarch64-musl",
+        "//build/native/platforms:linux-x86_64-musl",
+        "//build/native/platforms:linux-aarch64-musl",
         "//build/native/platforms:linux-x86_64-glibc",
         "//build/native/platforms:linux-aarch64-glibc",
         "//build/native/platforms:macos-x86_64",

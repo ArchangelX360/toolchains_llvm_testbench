@@ -30,13 +30,13 @@ LINUX_X86_64_MUSL_CONSTRAINTS = [
 ]
 
 LINUX_AARCH64_GLIBC_CONSTRAINTS = [
-    "@//build/native/libc:glibc",
+    "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
     "@platforms//cpu:arm64",
     "@platforms//os:linux",
 ]
 
 LINUX_X86_64_GLIBC_CONSTRAINTS = [
-    "@//build/native/libc:glibc",
+    "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
     "@platforms//cpu:x86_64",
     "@platforms//os:linux",
 ]

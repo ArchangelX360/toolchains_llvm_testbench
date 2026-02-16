@@ -112,7 +112,7 @@ llvm.sysroot(
 llvm.extra_target_compatible_with(
     name = "llvm_toolchain",
     constraints = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
     ],
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
@@ -308,7 +308,7 @@ rust.repository_set(
     edition = RUST_EDITION,
     exec_triple = "aarch64-apple-darwin",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -318,7 +318,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_darwin_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -380,7 +380,7 @@ rust.repository_set(
     edition = RUST_EDITION,
     exec_triple = "x86_64-apple-darwin",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -390,7 +390,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_darwin_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -452,7 +452,7 @@ rust.repository_set(
     edition = RUST_EDITION,
     exec_triple = "aarch64-pc-windows-msvc",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -462,7 +462,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_windows_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -524,7 +524,7 @@ rust.repository_set(
     edition = RUST_EDITION,
     exec_triple = "x86_64-pc-windows-msvc",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -534,7 +534,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_windows_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],

@@ -18,13 +18,13 @@ MACOS_X86_64_CONSTRAINTS = [
 ]
 
 LINUX_AARCH64_MUSL_CONSTRAINTS = [
-    "@//build/native/libc:musl",
+    "@toolchains_llvm_bootstrapped//constraints/libc:musl",
     "@platforms//cpu:arm64",
     "@platforms//os:linux",
 ]
 
 LINUX_X86_64_MUSL_CONSTRAINTS = [
-    "@//build/native/libc:musl",
+    "@toolchains_llvm_bootstrapped//constraints/libc:musl",
     "@platforms//cpu:x86_64",
     "@platforms//os:linux",
 ]

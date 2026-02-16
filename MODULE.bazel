@@ -5,8 +5,6 @@ bazel_dep(name = "toolchains_llvm", version = "1.6.0", dev_dependency = True)
 
 bazel_dep(name = "rules_rust", version = "0.68.1")
 
-bazel_dep(name = "toolchains_musl", version = "0.1.27", dev_dependency = True)
-
 git_override(
     module_name = "toolchains_llvm",
     commit = "27c0bc7378a3f0bce997f582b5d94ec84af606c7",
@@ -122,7 +120,22 @@ use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
 register_toolchains("@llvm_toolchain//:all")
 
 bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.7")
-register_toolchains("@toolchains_llvm_bootstrapped//toolchain:all")
+# Register musl-only constrained wrappers to ensure toolchains_llvm_bootstrapped
+# is never used for glibc targets (which should use toolchains_llvm instead)
+register_toolchains(
+    "//build/toolchains:linux_x86_64_to_linux_x86_64_musl",
+    "//build/toolchains:linux_aarch64_to_linux_aarch64_musl",
+    "//build/toolchains:linux_x86_64_to_linux_aarch64_musl",
+    "//build/toolchains:linux_aarch64_to_linux_x86_64_musl",
+    "//build/toolchains:macos_x86_64_to_linux_x86_64_musl",
+    "//build/toolchains:macos_x86_64_to_linux_aarch64_musl",
+    "//build/toolchains:macos_aarch64_to_linux_x86_64_musl",
+    "//build/toolchains:macos_aarch64_to_linux_aarch64_musl",
+    "//build/toolchains:windows_x86_64_to_linux_x86_64_musl",
+    "//build/toolchains:windows_x86_64_to_linux_aarch64_musl",
+    "//build/toolchains:windows_aarch64_to_linux_x86_64_musl",
+    "//build/toolchains:windows_aarch64_to_linux_aarch64_musl",
+)
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 
@@ -151,7 +164,7 @@ rust.repository_set(
     edition = RUST_EDITION,
     exec_triple = "x86_64-unknown-linux-gnu",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -161,7 +174,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -171,7 +184,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -180,7 +193,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -223,7 +236,7 @@ rust.repository_set(
     edition = RUST_EDITION,
     exec_triple = "aarch64-unknown-linux-gnu",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -233,7 +246,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:glibc",
+        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -243,7 +256,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -252,7 +265,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_linux_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -315,7 +328,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_darwin_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -324,7 +337,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_darwin_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -387,7 +400,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_darwin_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -396,7 +409,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_darwin_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -459,7 +472,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_windows_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -468,7 +481,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_windows_aarch64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -531,7 +544,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_windows_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:arm64",
         "@platforms//os:linux",
     ],
@@ -540,7 +553,7 @@ rust.repository_set(
 rust.repository_set(
     name = "rust_windows_x86_64",
     target_compatible_with = [
-        "@//build/native/libc:musl",
+        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],

@@ -1,11 +1,3 @@
-# Platforms to allow setting the native targets for which to compile.
-# We should probably instead use things like transitions, etc. This is just for convenience during PoC.
-#
-# Example of usage, to cross-compile from macOS/Linux to Windows ARM:
-#
-#   bazel build //... --platforms=//native/constraints:windows-aarch64
-#
-
 # Platform constraint definitions
 MACOS_AARCH64_CONSTRAINTS = [
     "@platforms//cpu:arm64",
@@ -18,25 +10,25 @@ MACOS_X86_64_CONSTRAINTS = [
 ]
 
 LINUX_AARCH64_MUSL_CONSTRAINTS = [
-    "@toolchains_llvm_bootstrapped//constraints/libc:musl",
+    "@//build/native/libc:musl",
     "@platforms//cpu:arm64",
     "@platforms//os:linux",
 ]
 
 LINUX_X86_64_MUSL_CONSTRAINTS = [
-    "@toolchains_llvm_bootstrapped//constraints/libc:musl",
+    "@//build/native/libc:musl",
     "@platforms//cpu:x86_64",
     "@platforms//os:linux",
 ]
 
 LINUX_AARCH64_GLIBC_CONSTRAINTS = [
-    "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
+    "@//build/native/libc:glibc",
     "@platforms//cpu:arm64",
     "@platforms//os:linux",
 ]
 
 LINUX_X86_64_GLIBC_CONSTRAINTS = [
-    "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
+    "@//build/native/libc:glibc",
     "@platforms//cpu:x86_64",
     "@platforms//os:linux",
 ]
@@ -55,49 +47,93 @@ WINDOWS_X86_64_CONSTRAINTS = [
 platform(
     name = "macos-aarch64",
     constraint_values = MACOS_AARCH64_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:aarch64-apple-darwin",
+    ]
 )
 
 platform(
     name = "macos-x86_64",
     constraint_values = MACOS_X86_64_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:x86_64-apple-darwin",
+    ]
 )
 
 platform(
     name = "linux-aarch64-musl",
     constraint_values = LINUX_AARCH64_MUSL_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:aarch64-unknown-linux-musl",
+    ]
 )
 
 platform(
     name = "linux-x86_64-musl",
     constraint_values = LINUX_X86_64_MUSL_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:x86_64-unknown-linux-musl",
+    ]
 )
 
 platform(
     name = "linux-aarch64-glibc",
     constraint_values = LINUX_AARCH64_GLIBC_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:aarch64-unknown-linux-gnu",
+    ]
 )
 
 platform(
     name = "linux-x86_64-glibc",
     constraint_values = LINUX_X86_64_GLIBC_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:x86_64-unknown-linux-gnu",
+    ]
 )
 
 platform(
     name = "windows-aarch64",
     constraint_values = WINDOWS_AARCH64_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:aarch64-pc-windows-msvc",
+    ]
 )
 
 platform(
     name = "windows-x86_64",
     constraint_values = WINDOWS_X86_64_CONSTRAINTS,
-    visibility = ["//rust:__subpackages__"],
+    visibility = ["@//fleet/native:__subpackages__"],
+    parents = [
+      "@rules_rs//rs/experimental/platforms:x86_64-pc-windows-msvc",
+    ]
+)
+
+# Overrides `@platforms//host` to set the default libc implementation for targets compiling binaries for the host platform to match the
+#  expected toolchains (especially for `rule_rs` rules like proc-macros, etc. I'm not sure about `rules_cc`)
+platform(
+    name = "local_linux",
+    parents = ["@platforms//host"],
+    constraint_values = [
+      "@@llvm+//constraints/libc:gnu.2.28",
+    ]
+)
+
+# Overrides `@platforms//host` to set the default libc implementation for targets compiling binaries for the host platform to match the
+#  expected toolchains (especially for `rule_rs` rules like proc-macros, etc. I'm not sure about `rules_cc`)
+platform(
+    name = "local_windows",
+    parents = ["@platforms//host"],
+    constraint_values = [
+      "@rules_rs//rs/experimental/platforms/constraints:windows_msvc",
+    ]
 )
 
 # Config settings for use in select() statements

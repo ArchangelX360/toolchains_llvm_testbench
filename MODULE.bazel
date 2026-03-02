@@ -1,32 +1,23 @@
 bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "rules_cc", version = "0.2.16")
 
-bazel_dep(name = "toolchains_llvm", version = "1.6.0", dev_dependency = True)
-
-bazel_dep(name = "rules_rust", version = "0.68.1")
-
-git_override(
-    module_name = "toolchains_llvm",
-    commit = "27c0bc7378a3f0bce997f582b5d94ec84af606c7",
-    remote = "https://github.com/ArchangelX360/toolchains_llvm",  # Add Windows support, this is a temporary fork until this is merged https://github.com/bazel-contrib/toolchains_llvm/pull/642
-)
-
-single_version_override(
-    module_name = "rules_rust",
-    patch_strip = 1,
-    patches = [
-        "//:build/native/rules_rust-musl.patch",  # add `*-musl` triple support
-        "//:build/native/rules_rust-pwd.patch",  # Fix path of several flags and environment variables for CC compilation
-        "//:build/native/rules_rust-verbose.patch",  # Increase verbosity
-    ],
-)
+bazel_dep(name = "rules_cc", version = "0.2.17")
 single_version_override(
     module_name = "rules_cc",
     patch_strip = 1,
     patches = [
-        "//:build/native/rules_cc-compiler_flags.patch",  # Ensure all default flags are propagated when using `windows_cc_toolchain_config.bzl`'s cc_toolchain_config
+        # "//:build/native/rules_cc-compiler_flags.patch",  # Ensure all default flags are propagated when using `windows_cc_toolchain_config.bzl`'s cc_toolchain_config
     ],
 )
+
+bazel_dep(name = "llvm", version = "0.6.1")
+single_version_override(
+    module_name = "llvm",
+    patch_strip = 1,
+    patches = [
+        # "@//:build/native/llvm/llvm_fetch.patch" #  keep until https://github.com/cerisier/toolchains_llvm_bootstrapped/issues/346
+    ],
+)
+register_toolchains("@llvm//toolchain:all")
 
 windows_sysroot_transformations = {
     "include/driverspecs.h": "include/DriverSpecs.h",  # Linux respects case, and some of our source files in transitive dependencies mention `DriverSpecs.h` and not `driverspecs.h`
@@ -76,532 +67,62 @@ local_archive(
     build_file = "@//sysroots:BUILD.linux_x86_64",
 )
 
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain(
-    name = "llvm_toolchain",
-    llvm_version = "20.1.3",
-)
-llvm.sysroot(
-    name = "llvm_toolchain",
-    label = "@sysroot-darwin//:sysroot",
-    targets = [
-        "darwin-aarch64",
-        "darwin-x86_64",
+bazel_dep(name = "rules_rs", version = "0.0.39")
+single_version_override(
+    module_name = "rules_rs",
+    patch_strip = 1,
+    patches = [
+      # "@//:build/native/rules_rs/rules_rs-create_features.patch",  # keep until https://github.com/dzbarsky/rules_rs/pull/50 is merged
     ],
-)
-llvm.sysroot(
-    name = "llvm_toolchain",
-    label = "@sysroot-windows_aarch64//:sysroot",
-    targets = ["windows-aarch64"],
-)
-llvm.sysroot(
-    name = "llvm_toolchain",
-    label = "@sysroot-windows_x86_64//:sysroot",
-    targets = ["windows-x86_64"],
-)
-llvm.sysroot(
-    name = "llvm_toolchain",
-    label = "@sysroot-linux-aarch64//:sysroot",
-    targets = ["linux-aarch64"],
-)
-llvm.sysroot(
-    name = "llvm_toolchain",
-    label = "@sysroot-linux-x86_64//:sysroot",
-    targets = ["linux-x86_64"],
-)
-llvm.extra_target_compatible_with(
-    name = "llvm_toolchain",
-    constraints = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-    ],
-)
-use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
-
-register_toolchains("@llvm_toolchain//:all")
-
-bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.7")
-# Register musl-only constrained wrappers to ensure toolchains_llvm_bootstrapped
-# is never used for glibc targets (which should use toolchains_llvm instead)
-register_toolchains(
-    "//build/toolchains:linux_x86_64_to_linux_x86_64_musl",
-    "//build/toolchains:linux_aarch64_to_linux_aarch64_musl",
-    "//build/toolchains:linux_x86_64_to_linux_aarch64_musl",
-    "//build/toolchains:linux_aarch64_to_linux_x86_64_musl",
-    "//build/toolchains:macos_x86_64_to_linux_x86_64_musl",
-    "//build/toolchains:macos_x86_64_to_linux_aarch64_musl",
-    "//build/toolchains:macos_aarch64_to_linux_x86_64_musl",
-    "//build/toolchains:macos_aarch64_to_linux_aarch64_musl",
-    "//build/toolchains:windows_x86_64_to_linux_x86_64_musl",
-    "//build/toolchains:windows_x86_64_to_linux_aarch64_musl",
-    "//build/toolchains:windows_aarch64_to_linux_x86_64_musl",
-    "//build/toolchains:windows_aarch64_to_linux_aarch64_musl",
 )
 
-rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rules_rust = use_extension("@rules_rs//rs/experimental:rules_rust.bzl", "rules_rust")
+use_repo(rules_rust, "rules_rust")
 
-RUST_TARGETS = [
-    "aarch64-apple-darwin",
-    "x86_64-apple-darwin",
-    "aarch64-pc-windows-msvc",
-    "x86_64-pc-windows-msvc",
-    "aarch64-unknown-linux-gnu",
-    "x86_64-unknown-linux-gnu",
-    "aarch64-unknown-linux-musl",
-    "x86_64-unknown-linux-musl",
-]
+rust_toolchains = use_extension("@rules_rs//rs/experimental/toolchains:module_extension.bzl", "toolchains")
+rust_toolchains.toolchain(
+    edition = "2021",
+    version = "1.93.1",
+)
+use_repo(rust_toolchains, "default_rust_toolchains")
+register_toolchains("@default_rust_toolchains//:all")
 
-RUST_EDITION = "2021"
-
-RUST_VERSION = "1.89.0"
-
-rust.toolchain(
-    edition = RUST_EDITION,
-    extra_target_triples = RUST_TARGETS,
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    edition = RUST_EDITION,
-    exec_triple = "x86_64-unknown-linux-gnu",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-gnu",
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-gnu",
-)
-
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "x86_64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "aarch64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "x86_64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_linux_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "aarch64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    edition = RUST_EDITION,
-    exec_triple = "aarch64-unknown-linux-gnu",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-gnu",
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-gnu",
-)
-
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "x86_64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "aarch64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "x86_64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_linux_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "aarch64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    edition = RUST_EDITION,
-    exec_triple = "aarch64-apple-darwin",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-gnu",
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-gnu",
-)
-
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "x86_64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "aarch64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "x86_64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_darwin_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "aarch64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    edition = RUST_EDITION,
-    exec_triple = "x86_64-apple-darwin",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-gnu",
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-gnu",
-)
-
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "x86_64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "aarch64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "x86_64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_darwin_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "aarch64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    edition = RUST_EDITION,
-    exec_triple = "aarch64-pc-windows-msvc",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-gnu",
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-gnu",
-)
-
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "x86_64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "aarch64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "x86_64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_windows_aarch64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "aarch64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    edition = RUST_EDITION,
-    exec_triple = "x86_64-pc-windows-msvc",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-gnu",
-    versions = [RUST_VERSION],
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:gnu.2.28",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-gnu",
-)
-
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:arm64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "aarch64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@toolchains_llvm_bootstrapped//constraints/libc:musl",
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_triple = "x86_64-unknown-linux-musl",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "x86_64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
-    target_triple = "aarch64-apple-darwin",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "x86_64-pc-windows-msvc",
-)
-rust.repository_set(
-    name = "rust_windows_x86_64",
-    target_compatible_with = [
-        "@platforms//cpu:arm64",
-        "@platforms//os:windows",
-    ],
-    target_triple = "aarch64-pc-windows-msvc",
-)
-use_repo(rust, "rust_toolchains")
-
-register_toolchains("@rust_toolchains//:all")
-
-crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate = use_extension("@rules_rs//rs:extensions.bzl", "crate")
 crate.from_cargo(
-    name = "rust_crates",
+    name = "crates",  # fleet_rust_crates name is short due to long path issues on Windows, we try to minimize the paths
     cargo_config = "//rust:.cargo/config.toml",
-    cargo_lockfile = "//rust:Cargo.lock",
-    lockfile = "//rust:cargo-bazel-lock.json",
-    manifests = ["//rust:Cargo.toml"],
-    supported_platform_triples = RUST_TARGETS,
+    cargo_lock = "//rust:Cargo.lock",
+    cargo_toml = "//rust:Cargo.toml",
+    platform_triples = [
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin",
+        "aarch64-pc-windows-msvc",
+        "x86_64-pc-windows-msvc",
+        "aarch64-unknown-linux-musl",
+        "x86_64-unknown-linux-musl",
+        "aarch64-unknown-linux-gnu",
+        "x86_64-unknown-linux-gnu",
+    ],
+    use_experimental_platforms = True,  # musl support in features resolution of third-party dependencies
 )
-use_repo(crate, "rust_crates")
+
+# TODO: having that error on Linux hosts
+#   ERROR: /home/parallels/.cache/JetBrains/MonorepoBazel/51db59cda7fb4f6e1c59be8fdb33a1fc/external/xz+/BUILD.bazel:274:11: Linking external/xz+/liblzma_src_common.a failed: (Exit 1): llvm-ar failed: error executing CppArchive command (from target @@xz+//:lzma_src_common) external/toolchains_llvm++llvm+llvm_toolchain/bin/llvm-ar @bazel-out/x86_64-apple-darwin-fastbuild/bin/external/xz+/liblzma_src_common.a-0.params
+#
+#   Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
+#   external/toolchains_llvm++llvm+llvm_toolchain/bin/llvm-ar: error: unknown option n
+#   OVERVIEW: LLVM Archiver
+#
+#   USAGE: llvm-ar [options] [-]<operation>[modifiers] [relpos] [count] <archive> [files]
+#          llvm-ar -M [<mri-script]
+
+# bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
+crate.annotation(
+    crate = "zstd-sys",
+    gen_build_script = "on",
+    # gen_build_script = "off",  # do not build `zstd` from git submodule sources, resolve it from BCR instead
+    # deps = ["@zstd"],
+)
+# inject_repo(crate, "zstd")
+
+use_repo(crate, "crates")

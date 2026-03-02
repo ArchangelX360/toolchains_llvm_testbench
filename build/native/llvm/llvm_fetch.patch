@@ -1,0 +1,49 @@
+Index: kernel/extension/kernel_headers.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/kernel/extension/kernel_headers.bzl b/kernel/extension/kernel_headers.bzl
+--- a/kernel/extension/kernel_headers.bzl   (revision 12e55acc7205d624bdb5de1e07a34e807dfde13e)
++++ b/kernel/extension/kernel_headers.bzl   (date 1772215124537)
+@@ -1,4 +1,3 @@
+-
+ load("@bazel_features//:features.bzl", "bazel_features")
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+@@ -12,7 +11,7 @@
+             allow_single_file = True,
+             default = ":trampoline.BUILD.bazel",
+         ),
+-    }
++    },
+ )
+
+ def _kernel_headers_impl(module_ctx):
+@@ -27,6 +26,9 @@
+
+     for version in index:
+         for kernel_arch in index[version]:
++            skipped = ["20251029", "20250511", "20251210"]
++            if kernel_arch in skipped:
++                continue
+             index_entry = index.get(version, {}).get(kernel_arch, None)
+             if index_entry == None:
+                 fail("Kernel headers for %s %s not found in index" % (version, kernel_arch))
+@@ -59,7 +61,6 @@
+         **metadata_kwargs
+     )
+
+-
+ kernel_headers_index = tag_class(
+     attrs = {
+         "file": attr.label(
+@@ -67,7 +68,7 @@
+             default = ":kernel_headers_index.json",
+             mandatory = True,
+         ),
+-    }
++    },
+ )
+
+ kernel_headers = module_extension(

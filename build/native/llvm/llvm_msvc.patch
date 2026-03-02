@@ -1,0 +1,3712 @@
+Subject: [PATCH] Fix the rest (huummmm that default change!)
+Fix x86_64
+Add missing clang headers, and fix pic
+checkpoint
+Add MSVC VC and SDK resolution using `winsysroot`
+---
+Index: runtimes/msvc/extension/msvc.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/runtimes/msvc/extension/msvc.bzl b/runtimes/msvc/extension/msvc.bzl
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/runtimes/msvc/extension/msvc.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,474 @@
++_MSVC_BUILD_FILE_CONTENT = """\
++load("@bazel_skylib//rules/directory:directory.bzl", "directory")
++load("@bazel_skylib//rules/directory:subdirectory.bzl", "subdirectory")
++
++package(default_visibility = ["//visibility:public"])
++
++directory(
++    name = "sysroot_files",
++    srcs = glob(["sysroot/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "sysroot_directory",
++    parent = ":sysroot_files",
++    path = "sysroot",
++)
++
++directory(
++    name = "msvc_include_files",
++    srcs = glob(["msvc_include/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "msvc_include",
++    parent = ":msvc_include_files",
++    path = "msvc_include",
++)
++
++directory(
++    name = "winsdk_ucrt_include_files",
++    srcs = glob(["winsdk_ucrt_include/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_ucrt_include",
++    parent = ":winsdk_ucrt_include_files",
++    path = "winsdk_ucrt_include",
++)
++
++directory(
++    name = "winsdk_shared_include_files",
++    srcs = glob(["winsdk_shared_include/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_shared_include",
++    parent = ":winsdk_shared_include_files",
++    path = "winsdk_shared_include",
++)
++
++directory(
++    name = "winsdk_um_include_files",
++    srcs = glob(["winsdk_um_include/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_um_include",
++    parent = ":winsdk_um_include_files",
++    path = "winsdk_um_include",
++)
++
++directory(
++    name = "winsdk_winrt_include_files",
++    srcs = glob(["winsdk_winrt_include/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_winrt_include",
++    parent = ":winsdk_winrt_include_files",
++    path = "winsdk_winrt_include",
++)
++
++directory(
++    name = "msvc_lib_arm64_files",
++    srcs = glob(["msvc_lib_arm64/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "msvc_lib_arm64",
++    parent = ":msvc_lib_arm64_files",
++    path = "msvc_lib_arm64",
++)
++
++directory(
++    name = "msvc_lib_x64_files",
++    srcs = glob(["msvc_lib_x64/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "msvc_lib_x64",
++    parent = ":msvc_lib_x64_files",
++    path = "msvc_lib_x64",
++)
++
++directory(
++    name = "winsdk_ucrt_lib_arm64_files",
++    srcs = glob(["winsdk_ucrt_lib_arm64/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_ucrt_lib_arm64",
++    parent = ":winsdk_ucrt_lib_arm64_files",
++    path = "winsdk_ucrt_lib_arm64",
++)
++
++directory(
++    name = "winsdk_ucrt_lib_x64_files",
++    srcs = glob(["winsdk_ucrt_lib_x64/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_ucrt_lib_x64",
++    parent = ":winsdk_ucrt_lib_x64_files",
++    path = "winsdk_ucrt_lib_x64",
++)
++
++directory(
++    name = "winsdk_um_lib_arm64_files",
++    srcs = glob(["winsdk_um_lib_arm64/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_um_lib_arm64",
++    parent = ":winsdk_um_lib_arm64_files",
++    path = "winsdk_um_lib_arm64",
++)
++
++directory(
++    name = "winsdk_um_lib_x64_files",
++    srcs = glob(["winsdk_um_lib_x64/**"], allow_empty = True),
++)
++
++subdirectory(
++    name = "winsdk_um_lib_x64",
++    parent = ":winsdk_um_lib_x64_files",
++    path = "winsdk_um_lib_x64",
++)
++
++alias(
++    name = "msvc_lib",
++    actual = select({
++        "@llvm//platforms/config:windows_aarch64": ":msvc_lib_arm64",
++        "//conditions:default": ":msvc_lib_x64",
++    }),
++)
++
++alias(
++    name = "winsdk_ucrt_lib",
++    actual = select({
++        "@llvm//platforms/config:windows_aarch64": ":winsdk_ucrt_lib_arm64",
++        "//conditions:default": ":winsdk_ucrt_lib_x64",
++    }),
++)
++
++alias(
++    name = "winsdk_um_lib",
++    actual = select({
++        "@llvm//platforms/config:windows_aarch64": ":winsdk_um_lib_arm64",
++        "//conditions:default": ":winsdk_um_lib_x64",
++    }),
++)
++
++filegroup(
++    name = "all_files",
++    srcs = glob(["**"], allow_empty = True),
++)
++
++filegroup(
++    name = "windows_sdk",
++    srcs = [":sysroot_directory"],
++)
++
++filegroup(
++    name = "headers_include",
++    srcs = glob([
++        "**/*.h",
++        "**/*.hh",
++        "**/*.hpp",
++    ], allow_empty = True),
++)
++
++filegroup(
++    name = "libs",
++    srcs = glob(["**/*.lib"], allow_empty = True),
++)
++"""
++
++_MSVC_ALIASES_BUILD_FILE_CONTENT = """\
++package(default_visibility = ["//visibility:public"])
++
++alias(
++    name = "all_files",
++    actual = "@{target_repo}//:all_files",
++)
++
++alias(
++    name = "windows_sdk",
++    actual = "@{target_repo}//:windows_sdk",
++)
++
++alias(
++    name = "sysroot_directory",
++    actual = "@{target_repo}//:sysroot_directory",
++)
++
++alias(
++    name = "headers_include",
++    actual = "@{target_repo}//:headers_include",
++)
++
++alias(
++    name = "msvc_include",
++    actual = "@{target_repo}//:msvc_include",
++)
++
++alias(
++    name = "winsdk_ucrt_include",
++    actual = "@{target_repo}//:winsdk_ucrt_include",
++)
++
++alias(
++    name = "winsdk_shared_include",
++    actual = "@{target_repo}//:winsdk_shared_include",
++)
++
++alias(
++    name = "winsdk_um_include",
++    actual = "@{target_repo}//:winsdk_um_include",
++)
++
++alias(
++    name = "winsdk_winrt_include",
++    actual = "@{target_repo}//:winsdk_winrt_include",
++)
++
++alias(
++    name = "msvc_lib",
++    actual = "@{target_repo}//:msvc_lib",
++)
++
++alias(
++    name = "winsdk_ucrt_lib",
++    actual = "@{target_repo}//:winsdk_ucrt_lib",
++)
++
++alias(
++    name = "winsdk_um_lib",
++    actual = "@{target_repo}//:winsdk_um_lib",
++)
++
++alias(
++    name = "libs",
++    actual = "@{target_repo}//:libs",
++)
++"""
++
++def _host_tokens(repository_ctx):
++    os_name = repository_ctx.os.name.lower()
++    arch = repository_ctx.os.arch.lower()
++
++    if os_name.startswith("mac os"):
++        os_token = "darwin"
++    elif os_name.startswith("linux"):
++        os_token = "linux"
++    elif os_name.startswith("windows"):
++        os_token = "windows"
++    else:
++        os_token = ""
++
++    if arch in ["arm64", "aarch64"]:
++        arch_tokens = ["arm64", "aarch64"]
++    elif arch in ["x86_64", "amd64"]:
++        arch_tokens = ["x86_64", "amd64"]
++    else:
++        arch_tokens = []
++
++    return os_token, arch_tokens
++
++def _default_winsysroot_urls(repository_ctx):
++    os_token, arch_tokens = _host_tokens(repository_ctx)
++    if not os_token or not arch_tokens:
++        return []
++
++    tag = repository_ctx.attr.winsysroot_version
++    repo_base = "https://github.com/ArchangelX360/winsysroot/releases/download/{}".format(tag)
++    urls = []
++    for arch_token in arch_tokens:
++        # Try common artifact naming patterns used in GitHub release binaries.
++        urls.extend([
++            "{}/winsysroot-{}-{}".format(repo_base, os_token, arch_token),
++            "{}/winsysroot_{}_{}".format(repo_base, os_token, arch_token),
++            "{}/winsysroot-{}-{}-{}".format(repo_base, tag, os_token, arch_token),
++            "{}/winsysroot_{}_{}_{}".format(repo_base, tag, os_token, arch_token),
++            "{}/winsysroot-{}-{}.exe".format(repo_base, os_token, arch_token),
++            "{}/winsysroot_{}_{}.exe".format(repo_base, os_token, arch_token),
++            "{}/winsysroot-{}-{}-{}.exe".format(repo_base, tag, os_token, arch_token),
++            "{}/winsysroot_{}_{}_{}.exe".format(repo_base, tag, os_token, arch_token),
++        ])
++    return urls
++
++def _winsysroot_repository_impl(repository_ctx):
++    winsysroot_path = repository_ctx.which("winsysroot")
++
++    default_urls = []
++    if not repository_ctx.attr.winsysroot_urls:
++        default_urls = _default_winsysroot_urls(repository_ctx)
++
++    winsysroot_urls = repository_ctx.attr.winsysroot_urls if repository_ctx.attr.winsysroot_urls else default_urls
++    if winsysroot_urls:
++        os_token, _ = _host_tokens(repository_ctx)
++        binary_name = "winsysroot.exe" if os_token == "windows" else "winsysroot"
++        winsysroot_path = repository_ctx.path(binary_name)
++        repository_ctx.download(
++            url = winsysroot_urls,
++            output = winsysroot_path,
++            executable = True,
++            sha256 = repository_ctx.attr.winsysroot_sha256,
++            integrity = repository_ctx.attr.winsysroot_integrity,
++        )
++
++    if not winsysroot_path:
++        fail("winsysroot is required. Provide msvc.winsysroot(urls = [...]) or install a `winsysroot` binary in PATH.")
++
++    cmd = [
++        str(winsysroot_path),
++        "-win-sdk-version",
++        repository_ctx.attr.windows_sdk_version,
++        "-architectures",
++        repository_ctx.attr.architectures,
++        "-out-dir",
++        "sysroot",
++    ] + repository_ctx.attr.winsysroot_extra_args
++    result = repository_ctx.execute(cmd)
++    if result.return_code != 0:
++        fail("winsysroot failed with exit code {}.\nstdout:\n{}\nstderr:\n{}".format(result.return_code, result.stdout, result.stderr))
++
++    msvc_version_dirs = repository_ctx.path("sysroot/VC/Tools/MSVC").readdir()
++    if len(msvc_version_dirs) != 1:
++        fail("Expected exactly one MSVC version under sysroot/VC/Tools/MSVC, got {}".format([d.basename for d in msvc_version_dirs]))
++    msvc_version = msvc_version_dirs[0].basename
++
++    windows_sdk_include_root = "sysroot/Windows Kits/10/Include/{}".format(repository_ctx.attr.windows_sdk_version + ".0")
++    if not repository_ctx.path(windows_sdk_include_root).exists:
++        windows_sdk_include_root = "sysroot/Windows Kits/10/Include/{}".format(repository_ctx.attr.windows_sdk_version)
++    windows_sdk_lib_root = "sysroot/Windows Kits/10/Lib/{}".format(repository_ctx.attr.windows_sdk_version + ".0")
++    if not repository_ctx.path(windows_sdk_lib_root).exists:
++        windows_sdk_lib_root = "sysroot/Windows Kits/10/Lib/{}".format(repository_ctx.attr.windows_sdk_version)
++
++    repository_ctx.symlink("sysroot/VC/Tools/MSVC/{}/include".format(msvc_version), "msvc_include")
++    repository_ctx.symlink("sysroot/VC/Tools/MSVC/{}/lib/arm64".format(msvc_version), "msvc_lib_arm64")
++    repository_ctx.symlink("sysroot/VC/Tools/MSVC/{}/lib/x64".format(msvc_version), "msvc_lib_x64")
++    repository_ctx.symlink("{}/ucrt".format(windows_sdk_include_root), "winsdk_ucrt_include")
++    repository_ctx.symlink("{}/shared".format(windows_sdk_include_root), "winsdk_shared_include")
++    repository_ctx.symlink("{}/um".format(windows_sdk_include_root), "winsdk_um_include")
++    repository_ctx.symlink("{}/winrt".format(windows_sdk_include_root), "winsdk_winrt_include")
++    repository_ctx.symlink("{}/ucrt/arm64".format(windows_sdk_lib_root), "winsdk_ucrt_lib_arm64")
++    repository_ctx.symlink("{}/ucrt/x64".format(windows_sdk_lib_root), "winsdk_ucrt_lib_x64")
++    repository_ctx.symlink("{}/um/arm64".format(windows_sdk_lib_root), "winsdk_um_lib_arm64")
++    repository_ctx.symlink("{}/um/x64".format(windows_sdk_lib_root), "winsdk_um_lib_x64")
++
++    repository_ctx.file("BUILD.bazel", _MSVC_BUILD_FILE_CONTENT)
++
++_winsysroot_repository = repository_rule(
++    implementation = _winsysroot_repository_impl,
++    attrs = {
++        "winsysroot_urls": attr.string_list(),
++        "winsysroot_sha256": attr.string(),
++        "winsysroot_integrity": attr.string(),
++        "winsysroot_version": attr.string(default = "0.0.2"),
++        "windows_sdk_version": attr.string(default = "10.0.26100"),
++        "architectures": attr.string(default = "x64,arm64"),
++        "winsysroot_extra_args": attr.string_list(),
++    },
++)
++
++def _winsysroot_alias_repository_impl(repository_ctx):
++    repository_ctx.file(
++        "BUILD.bazel",
++        _MSVC_ALIASES_BUILD_FILE_CONTENT.format(
++            target_repo = repository_ctx.attr.target_repo,
++        ),
++    )
++
++_winsysroot_alias_repository = repository_rule(
++    implementation = _winsysroot_alias_repository_impl,
++    attrs = {
++        "target_repo": attr.string(mandatory = True),
++    },
++)
++
++def _read_winsysroot_tag(module_ctx):
++    root_tags = []
++    non_root_tags = []
++    for mod in module_ctx.modules:
++        if mod.is_root:
++            root_tags.extend(mod.tags.winsysroot)
++        else:
++            non_root_tags.extend(mod.tags.winsysroot)
++
++    if len(root_tags) > 1:
++        fail("Only one msvc.winsysroot(...) tag is supported in the root module.")
++
++    if root_tags:
++        return root_tags[0]
++    if non_root_tags:
++        return non_root_tags[0]
++    return None
++
++def _msvc_extension_impl(module_ctx):
++    """Implementation of the msvc module extension."""
++
++    winsysroot_tag = _read_winsysroot_tag(module_ctx)
++
++    _winsysroot_repository(
++        name = "windows_sdk",
++        winsysroot_urls = winsysroot_tag.urls if winsysroot_tag else [],
++        winsysroot_sha256 = winsysroot_tag.sha256 if winsysroot_tag else "",
++        winsysroot_integrity = winsysroot_tag.integrity if winsysroot_tag else "",
++        winsysroot_version = winsysroot_tag.version if winsysroot_tag else "0.0.2",
++        windows_sdk_version = winsysroot_tag.windows_sdk_version if winsysroot_tag else "10.0.26100",
++        architectures = winsysroot_tag.architectures if winsysroot_tag else "x64,arm64",
++        winsysroot_extra_args = winsysroot_tag.extra_args if winsysroot_tag else [],
++    )
++
++    _winsysroot_alias_repository(
++        name = "windows_sdk_arm64",
++        target_repo = "windows_sdk",
++    )
++    _winsysroot_alias_repository(
++        name = "windows_sdk_x64",
++        target_repo = "windows_sdk",
++    )
++
++    return module_ctx.extension_metadata(
++        root_module_direct_deps = ["windows_sdk", "windows_sdk_arm64", "windows_sdk_x64"],
++        root_module_direct_dev_deps = [],
++    )
++
++_winsysroot = tag_class(
++    attrs = {
++        "urls": attr.string_list(
++            doc = "Optional prebuilt winsysroot binary URLs. If not set, URLs are auto-derived from `version`.",
++        ),
++        "version": attr.string(
++            default = "0.0.2",
++            doc = "winsysroot release tag used to derive default binary URLs.",
++        ),
++        "sha256": attr.string(
++            doc = "Optional SHA-256 for the downloaded winsysroot binary.",
++        ),
++        "integrity": attr.string(
++            doc = "Optional SRI integrity for the downloaded winsysroot binary.",
++        ),
++        "windows_sdk_version": attr.string(
++            default = "10.0.26100",
++            doc = "Windows SDK version passed to winsysroot.",
++        ),
++        "architectures": attr.string(
++            default = "x64,arm64",
++            doc = "Comma-separated architectures forwarded to winsysroot (-architectures).",
++        ),
++        "extra_args": attr.string_list(
++            doc = "Extra arguments forwarded to winsysroot.",
++        ),
++    },
++)
++
++msvc = module_extension(
++    implementation = _msvc_extension_impl,
++    tag_classes = {
++        "winsysroot": _winsysroot,
++    },
++    doc = "Extension for downloading and configuring MSVC via winsysroot.",
++)
+Index: 3rd_party/llvm-project/21.x/compiler-rt/compiler-rt.BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/3rd_party/llvm-project/21.x/compiler-rt/compiler-rt.BUILD.bazel b/3rd_party/llvm-project/21.x/compiler-rt/compiler-rt.BUILD.bazel
+--- a/3rd_party/llvm-project/21.x/compiler-rt/compiler-rt.BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/3rd_party/llvm-project/21.x/compiler-rt/compiler-rt.BUILD.bazel	(revision e55eb0897213816d7abd7f7083ee78fd0dd30f3e)
+@@ -1,14 +1,14 @@
++load("@bazel_skylib//lib:selects.bzl", "selects")
++load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
++load("@llvm//:directory.bzl", "headers_directory")
++load("@llvm//:sh_script.bzl", "sh_script")
++load("@llvm//3rd_party/llvm-project/21.x/compiler-rt:filter_builtin_sources.bzl", "filter_builtin_sources")
++load("@llvm//3rd_party/llvm-project/21.x/compiler-rt:targets.bzl", "atomic_helper_cc_library")
++load("@llvm//toolchain/args:llvm_target_triple.bzl", "LLVM_TARGET_TRIPLE")
+ load("@llvm//toolchain/runtimes:cc_runtime_shared_library.bzl", "cc_runtime_stage0_shared_library")
+ load("@llvm//toolchain/runtimes:cc_runtime_static_library.bzl", "cc_runtime_stage0_static_library")
+-load("@llvm//:directory.bzl", "headers_directory")
+ load("@llvm//toolchain/runtimes:cc_stage0_object.bzl", "cc_stage0_object")
+-load("@llvm//toolchain/args:llvm_target_triple.bzl", "LLVM_TARGET_TRIPLE")
+ load("@llvm//toolchain/runtimes:cc_unsanitized_library.bzl", "cc_unsanitized_library")
+-load("@llvm//3rd_party/llvm-project/21.x/compiler-rt:targets.bzl", "atomic_helper_cc_library")
+-load("@llvm//3rd_party/llvm-project/21.x/compiler-rt:filter_builtin_sources.bzl", "filter_builtin_sources")
+-load("@llvm//:sh_script.bzl", "sh_script")
+-load("@bazel_skylib//lib:selects.bzl", "selects")
+-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+ load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ ###
+@@ -222,7 +222,7 @@
+     name = "builtins_x86_arch_sources",
+     srcs = [
+         "lib/builtins/cpu_model/x86.c",
+-        "lib/builtins/i386/fp_mode.c", #if (NOT MSVC)
++        "lib/builtins/i386/fp_mode.c",  #if (NOT MSVC)
+     ],
+ )
+
+@@ -230,16 +230,16 @@
+     name = "builtins_x86_80_bit_sources",
+     srcs = [
+         "lib/builtins/divxc3.c",
+-        "lib/builtins/fixxfdi.c",
+-        "lib/builtins/fixxfti.c",
++        "lib/builtins/extendxftf2.c",
+         "lib/builtins/fixunsxfdi.c",
+         "lib/builtins/fixunsxfsi.c",
+         "lib/builtins/fixunsxfti.c",
+-        "lib/builtins/floatdixf.c", # if not android
++        "lib/builtins/fixxfdi.c",
++        "lib/builtins/fixxfti.c",
++        "lib/builtins/floatdixf.c",  # if not android
+         "lib/builtins/floattixf.c",
+         "lib/builtins/floatundixf.c",
+         "lib/builtins/floatuntixf.c",
+-        "lib/builtins/extendxftf2.c",
+         "lib/builtins/mulxc3.c",
+         "lib/builtins/powixf2.c",
+         "lib/builtins/trunctfxf2.c",
+@@ -249,21 +249,21 @@
+ filter_builtin_sources(
+     name = "builtins_x86_64_sources",
+     srcs = [
++        "lib/builtins/x86_64/floatdidf.c",
++        "lib/builtins/x86_64/floatdisf.c",
+         ":builtins_generic_srcs",
+         ":builtins_generic_tf_sources",
+         ":builtins_x86_arch_sources",
+-        ":builtins_x86_80_bit_sources",
+-        "lib/builtins/x86_64/floatdidf.c",
+-        "lib/builtins/x86_64/floatdisf.c",
+-        "lib/builtins/x86_64/floatdixf.c",  # if not ANDROID
+     ] + select({
+         "@platforms//os:windows": [
+             "lib/builtins/x86_64/chkstk.S",
+         ],
+         "//conditions:default": [
++            "lib/builtins/x86_64/floatdixf.c",  # if not ANDROID
+             "lib/builtins/x86_64/floatundidf.S",
+             "lib/builtins/x86_64/floatundisf.S",
+             "lib/builtins/x86_64/floatundixf.S",  # if not ANDROID
++            ":builtins_x86_80_bit_sources",
+         ],
+     }),
+ )
+@@ -271,20 +271,20 @@
+ filegroup(
+     name = "builtins_aarch64_arch_sources",
+     srcs = [
++        "lib/builtins/aarch64/fp_mode.c",
+         "lib/builtins/cpu_model/aarch64.c",
+-        "lib/builtins/aarch64/fp_mode.c",
+     ],
+ )
+
+ filter_builtin_sources(
+     name = "builtins_aarch64_sources",
+     srcs = [
++        ":builtins_aarch64_arch_sources",
+         ":builtins_generic_srcs",
+         ":builtins_generic_tf_sources",
+-        ":builtins_aarch64_arch_sources",
+     ] + select({
+         "@platforms//os:windows": [
+-            "lib/builtins/aarch64/chkstk.S", # if MINGW
++            "lib/builtins/aarch64/chkstk.S",  # if MINGW
+         ],
+         "//conditions:default": [],
+     }),
+@@ -309,13 +309,32 @@
+ builtins_aarch64_atomic_deps = [
+     atomic_helper_cc_library(
+         name = "builtins_atomic_helper_{}_{}_{}".format(pat, size, model),
+-        pat = pat,
+         size = size,
+         model = model,
++        pat = pat,
+     )
+-    for pat in ["cas", "swp", "ldadd", "ldclr", "ldeor", "ldset"]
+-    for size in [1, 2, 4, 8, 16]
+-    for model in [1, 2, 3, 4, 5]
++    for pat in [
++        "cas",
++        "swp",
++        "ldadd",
++        "ldclr",
++        "ldeor",
++        "ldset",
++    ]
++    for size in [
++        1,
++        2,
++        4,
++        8,
++        16,
++    ]
++    for model in [
++        1,
++        2,
++        3,
++        4,
++        5,
++    ]
+     if pat == "cas" or size != 16
+ ]
+
+@@ -326,17 +345,19 @@
+
+ cc_library(
+     name = "builtins",
+-    includes = ["lib/builtins"],
+-    srcs = select({
+-        "@platforms//cpu:x86_64": [":builtins_x86_64_sources"],
+-        "@platforms//cpu:aarch64": [":builtins_aarch64_sources"],
+-        "@platforms//cpu:wasm32": [":builtins_wasm32_sources"],
+-        "@platforms//cpu:wasm64": [":builtins_wasm64_sources"],
+-    }, no_match_error = """
++    srcs = select(
++        {
++            "@platforms//cpu:x86_64": [":builtins_x86_64_sources"],
++            "@platforms//cpu:aarch64": [":builtins_aarch64_sources"],
++            "@platforms//cpu:wasm32": [":builtins_wasm32_sources"],
++            "@platforms//cpu:wasm64": [":builtins_wasm64_sources"],
++        },
++        no_match_error = """
+         Architecture not supported for compiler-rt.builtins.
+         It is likely that we are just missing the filegroups for that platform.
+         Please file an issue.
+-    """) + [
++    """,
++    ) + [
+         "lib/builtins/assembly.h",
+         "lib/builtins/fp_extend.h",
+         "lib/builtins/fp_lib.h",
+@@ -381,13 +402,44 @@
+             "-Wno-deprecated-declarations",
+             # TODO(zbarsky): This is spammy, but we should do a real fix.
+             # "-Wno-macro-redefined",
+-         ],
++        ],
+         "@platforms//os:windows": [
+             "-Wno-missing-declarations",
+             "-Wno-pragma-pack",
+         ],
+         "//conditions:default": [],
+     }),
++    features = select({
++        "@platforms//os:windows": ["-pic"],
++        "//conditions:default": [],
++    }),
++    implementation_deps = select({
++        "@platforms//os:macos": [],
++        "@platforms//os:linux": [
++            # TODO(cerisier): Provide only a subset of linux UAPI headers for musl.
++            # https://github.com/cerisier/toolchains_llvm_bootstrapped/issues/146
++            "@kernel_headers",
++        ],
++        "@platforms//os:windows": [],
++        "@platforms//os:none": [],
++    }) + select({
++        "@llvm//platforms/config:musl": [
++            "@musl_libc//:musl_libc_headers",
++        ],
++        "@llvm//platforms/config:gnu": [
++            "@glibc//:gnu_libc_headers",
++        ],
++        "@platforms//os:macos": [
++            # on macOS we implicitly use SDK provided headers
++        ],
++        "@llvm//platforms/config:abi_gnu": [
++            "@mingw//:mingw_headers",
++        ],
++        "@platforms//os:windows": [],
++        "@platforms//os:none": [],
++    }),
++    includes = ["lib/builtins"],
++    linkstatic = True,
+     local_defines = selects.with_or({
+         (
+             # The following additional architectures support float16:
+@@ -447,51 +499,30 @@
+         ],
+         "//conditions:default": [],
+     }),
+-    linkstatic = True,
+     deps = select({
+         "@platforms//cpu:aarch64": [
+             ":builtins_aarch64_atomic",
+         ],
+         "//conditions:default": [],
+     }),
+-    implementation_deps = select({
+-        "@platforms//os:macos": [],
+-        "@platforms//os:linux": [
+-            # TODO(cerisier): Provide only a subset of linux UAPI headers for musl.
+-            # https://github.com/cerisier/toolchains_llvm_bootstrapped/issues/146
+-            "@kernel_headers//:kernel_headers",
+-        ],
+-        "@platforms//os:windows": [],
+-        "@platforms//os:none": [],
+-    }) + select({
+-        "@llvm//platforms/config:musl": [
+-            "@musl_libc//:musl_libc_headers",
+-        ],
+-        "@llvm//platforms/config:gnu": [
+-            "@glibc//:gnu_libc_headers",
+-        ],
+-        "@platforms//os:macos": [
+-            # on macOS we implicitly use SDK provided headers
+-        ],
+-        "@platforms//os:windows": [
+-            "@mingw//:mingw_headers",
+-        ],
+-        "@platforms//os:none": [],
+-    }),
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "clang_rt.builtins.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":builtins",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ CRT_CFLAGS = [
+     "-std=c11",
+-    "-fPIC",
+-]
++] + select({
++    "@platforms//os:windows": [],
++    "//conditions:default": [
++        "-fPIC",
++    ],
++})
+
+ CRT_DEFINES = [
+     "CRT_HAS_INITFINI_ARRAY",
+@@ -513,14 +544,14 @@
+     srcs = [
+         ":clang_rt.crtbegin",
+     ],
+-    copts = [
+-        "-target",
+-    ] + LLVM_TARGET_TRIPLE,
+     #TODO(cerisier): Rename to clang_rt.crtbegin.o and expose this with -L.
+     #
+     # This is because clang driver looks for this instead of crtbegin<ST>.o
+     # when --rtlib=compiler-rt is used.
+     out = "crtbegin.o",
++    copts = [
++        "-target",
++    ] + LLVM_TARGET_TRIPLE,
+     visibility = ["//visibility:public"],
+ )
+
+@@ -542,10 +573,10 @@
+
+ cc_runtime_stage0_static_library(
+     name = "clang_rt.crtbegin.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":clang_rt.crtbegin",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_library(
+@@ -563,14 +594,14 @@
+     srcs = [
+         ":clang_rt.crtend",
+     ],
+-    copts = [
+-        "-target",
+-    ] + LLVM_TARGET_TRIPLE,
+     #TODO(cerisier): Rename to clang_rt.crtend.o and expose this with -L.
+     #
+     # This is because clang driver looks for this instead of crtend<ST>.o
+     # when --rtlib=compiler-rt is used.
+     out = "crtend.o",
++    copts = [
++        "-target",
++    ] + LLVM_TARGET_TRIPLE,
+     visibility = ["//visibility:public"],
+ )
+
+@@ -584,10 +615,10 @@
+
+ cc_runtime_stage0_static_library(
+     name = "clang_rt.crtend.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":clang_rt.crtend",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ##### Sanitizers #######
+@@ -628,7 +659,7 @@
+         # linux UAPI headers are needed even for musl here because sanitizers include <sys/vt.h>
+         # TODO(cerisier): Provide only a subset of linux UAPI headers for musl.
+         # https://github.com/cerisier/toolchains_llvm_bootstrapped/issues/146
+-        "@kernel_headers//:kernel_headers",
++        "@kernel_headers",
+         # Order matter. Search path should have C++ headers before any lib C headers.
+     ] + select({
+         "@llvm//platforms/config:musl": [
+@@ -645,9 +676,9 @@
+     deps = select({
+         "@platforms//os:macos": [],
+         "@platforms//os:linux": [
++            ":linux_libc_headers",
+             "@libcxx//:headers",
+             "@libcxxabi//:headers",
+-            ":linux_libc_headers",
+         ],
+     }),
+ )
+@@ -656,7 +687,7 @@
+ ### compiler-rt/CMakeLists.txt.
+ ###
+
+-SANITIZER_COMMON_CFLAGS =  select({
++SANITIZER_COMMON_CFLAGS = select({
+     "@platforms//os:windows": [],
+     "//conditions:default": [
+         "-fPIC",
+@@ -668,7 +699,7 @@
+     "-fno-stack-protector",
+     "-fvisibility=hidden",
+     "-fno-lto",
+-    "-O3", # if not debug else -O1
++    "-O3",  # if not debug else -O1
+     "-gline-tables-only",
+     # "-g" # if debug
+     "-fno-modules",
+@@ -689,51 +720,51 @@
+ ###
+
+ SANITIZER_SOURCES_NOTERMINATION = [
+-  "sanitizer_allocator.cpp",
+-  "sanitizer_common.cpp",
+-  "sanitizer_deadlock_detector1.cpp",
+-  "sanitizer_deadlock_detector2.cpp",
+-  "sanitizer_errno.cpp",
+-  "sanitizer_file.cpp",
+-  "sanitizer_flags.cpp",
+-  "sanitizer_flag_parser.cpp",
+-  "sanitizer_fuchsia.cpp",
+-  "sanitizer_libc.cpp",
+-  "sanitizer_libignore.cpp",
+-  "sanitizer_linux.cpp",
+-  "sanitizer_linux_s390.cpp",
+-  "sanitizer_mac.cpp",
+-  "sanitizer_mutex.cpp",
+-  "sanitizer_netbsd.cpp",
+-  "sanitizer_platform_limits_freebsd.cpp",
+-  "sanitizer_platform_limits_linux.cpp",
+-  "sanitizer_platform_limits_netbsd.cpp",
+-  "sanitizer_platform_limits_posix.cpp",
+-  "sanitizer_platform_limits_solaris.cpp",
+-  "sanitizer_posix.cpp",
+-  "sanitizer_printf.cpp",
+-  "sanitizer_procmaps_common.cpp",
+-  "sanitizer_procmaps_bsd.cpp",
+-  "sanitizer_procmaps_fuchsia.cpp",
+-  "sanitizer_procmaps_linux.cpp",
+-  "sanitizer_procmaps_mac.cpp",
+-  "sanitizer_procmaps_solaris.cpp",
+-  "sanitizer_range.cpp",
+-  "sanitizer_solaris.cpp",
+-  "sanitizer_stoptheworld_fuchsia.cpp",
+-  "sanitizer_stoptheworld_mac.cpp",
+-  "sanitizer_stoptheworld_win.cpp",
+-  "sanitizer_suppressions.cpp",
+-  "sanitizer_tls_get_addr.cpp",
+-  "sanitizer_thread_arg_retval.cpp",
+-  "sanitizer_thread_registry.cpp",
+-  "sanitizer_type_traits.cpp",
+-  "sanitizer_win.cpp",
+-  "sanitizer_win_interception.cpp",
++    "sanitizer_allocator.cpp",
++    "sanitizer_common.cpp",
++    "sanitizer_deadlock_detector1.cpp",
++    "sanitizer_deadlock_detector2.cpp",
++    "sanitizer_errno.cpp",
++    "sanitizer_file.cpp",
++    "sanitizer_flags.cpp",
++    "sanitizer_flag_parser.cpp",
++    "sanitizer_fuchsia.cpp",
++    "sanitizer_libc.cpp",
++    "sanitizer_libignore.cpp",
++    "sanitizer_linux.cpp",
++    "sanitizer_linux_s390.cpp",
++    "sanitizer_mac.cpp",
++    "sanitizer_mutex.cpp",
++    "sanitizer_netbsd.cpp",
++    "sanitizer_platform_limits_freebsd.cpp",
++    "sanitizer_platform_limits_linux.cpp",
++    "sanitizer_platform_limits_netbsd.cpp",
++    "sanitizer_platform_limits_posix.cpp",
++    "sanitizer_platform_limits_solaris.cpp",
++    "sanitizer_posix.cpp",
++    "sanitizer_printf.cpp",
++    "sanitizer_procmaps_common.cpp",
++    "sanitizer_procmaps_bsd.cpp",
++    "sanitizer_procmaps_fuchsia.cpp",
++    "sanitizer_procmaps_linux.cpp",
++    "sanitizer_procmaps_mac.cpp",
++    "sanitizer_procmaps_solaris.cpp",
++    "sanitizer_range.cpp",
++    "sanitizer_solaris.cpp",
++    "sanitizer_stoptheworld_fuchsia.cpp",
++    "sanitizer_stoptheworld_mac.cpp",
++    "sanitizer_stoptheworld_win.cpp",
++    "sanitizer_suppressions.cpp",
++    "sanitizer_tls_get_addr.cpp",
++    "sanitizer_thread_arg_retval.cpp",
++    "sanitizer_thread_registry.cpp",
++    "sanitizer_type_traits.cpp",
++    "sanitizer_win.cpp",
++    "sanitizer_win_interception.cpp",
+ ]
+
+ SANITIZER_SOURCES = SANITIZER_SOURCES_NOTERMINATION + [
+-  "sanitizer_termination.cpp",
++    "sanitizer_termination.cpp",
+ ]
+
+ filegroup(
+@@ -745,18 +776,18 @@
+ # SANITIZER_LIBCDEP_SOURCES when sanitizer_common library must not depend on
+ # libc.
+ SANITIZER_NOLIBC_SOURCES = [
+-  "sanitizer_common_nolibc.cpp"
++    "sanitizer_common_nolibc.cpp",
+ ]
+
+ SANITIZER_LIBCDEP_SOURCES = [
+-  "sanitizer_common_libcdep.cpp",
+-  "sanitizer_allocator_checks.cpp",
+-  "sanitizer_dl.cpp",
+-  "sanitizer_linux_libcdep.cpp",
+-  "sanitizer_mac_libcdep.cpp",
+-  "sanitizer_posix_libcdep.cpp",
+-  "sanitizer_stoptheworld_linux_libcdep.cpp",
+-  "sanitizer_stoptheworld_netbsd_libcdep.cpp",
++    "sanitizer_common_libcdep.cpp",
++    "sanitizer_allocator_checks.cpp",
++    "sanitizer_dl.cpp",
++    "sanitizer_linux_libcdep.cpp",
++    "sanitizer_mac_libcdep.cpp",
++    "sanitizer_posix_libcdep.cpp",
++    "sanitizer_stoptheworld_linux_libcdep.cpp",
++    "sanitizer_stoptheworld_netbsd_libcdep.cpp",
+ ]
+
+ filegroup(
+@@ -765,10 +796,10 @@
+ )
+
+ SANITIZER_COVERAGE_SOURCES = [
+-  "sancov_flags.cpp",
+-  "sanitizer_coverage_fuchsia.cpp",
+-  "sanitizer_coverage_libcdep_new.cpp",
+-  "sanitizer_coverage_win_sections.cpp",
++    "sancov_flags.cpp",
++    "sanitizer_coverage_fuchsia.cpp",
++    "sanitizer_coverage_libcdep_new.cpp",
++    "sanitizer_coverage_win_sections.cpp",
+ ]
+
+ filegroup(
+@@ -777,28 +808,28 @@
+ )
+
+ SANITIZER_SYMBOLIZER_SOURCES = [
+-  "sanitizer_allocator_report.cpp",
+-  "sanitizer_chained_origin_depot.cpp",
+-  "sanitizer_stack_store.cpp",
+-  "sanitizer_stackdepot.cpp",
+-  "sanitizer_stacktrace.cpp",
+-  "sanitizer_stacktrace_libcdep.cpp",
+-  "sanitizer_stacktrace_printer.cpp",
+-  "sanitizer_stacktrace_sparc.cpp",
+-  "sanitizer_symbolizer.cpp",
+-  "sanitizer_symbolizer_libbacktrace.cpp",
+-  "sanitizer_symbolizer_libcdep.cpp",
+-  "sanitizer_symbolizer_mac.cpp",
+-  "sanitizer_symbolizer_markup.cpp",
+-  "sanitizer_symbolizer_markup_fuchsia.cpp",
+-  "sanitizer_symbolizer_posix_libcdep.cpp",
+-  "sanitizer_symbolizer_report.cpp",
+-  "sanitizer_symbolizer_report_fuchsia.cpp",
+-  "sanitizer_symbolizer_win.cpp",
+-  "sanitizer_thread_history.cpp",
+-  "sanitizer_unwind_linux_libcdep.cpp",
+-  "sanitizer_unwind_fuchsia.cpp",
+-  "sanitizer_unwind_win.cpp",
++    "sanitizer_allocator_report.cpp",
++    "sanitizer_chained_origin_depot.cpp",
++    "sanitizer_stack_store.cpp",
++    "sanitizer_stackdepot.cpp",
++    "sanitizer_stacktrace.cpp",
++    "sanitizer_stacktrace_libcdep.cpp",
++    "sanitizer_stacktrace_printer.cpp",
++    "sanitizer_stacktrace_sparc.cpp",
++    "sanitizer_symbolizer.cpp",
++    "sanitizer_symbolizer_libbacktrace.cpp",
++    "sanitizer_symbolizer_libcdep.cpp",
++    "sanitizer_symbolizer_mac.cpp",
++    "sanitizer_symbolizer_markup.cpp",
++    "sanitizer_symbolizer_markup_fuchsia.cpp",
++    "sanitizer_symbolizer_posix_libcdep.cpp",
++    "sanitizer_symbolizer_report.cpp",
++    "sanitizer_symbolizer_report_fuchsia.cpp",
++    "sanitizer_symbolizer_win.cpp",
++    "sanitizer_thread_history.cpp",
++    "sanitizer_unwind_linux_libcdep.cpp",
++    "sanitizer_unwind_fuchsia.cpp",
++    "sanitizer_unwind_win.cpp",
+ ]
+
+ filegroup(
+@@ -810,122 +841,122 @@
+ # included in sanitizer_common source files, but we need to depend on
+ # headers when building our custom unit tests.
+ SANITIZER_IMPL_HEADERS = [
+-  "sancov_flags.h",
+-  "sancov_flags.inc",
+-  "sanitizer_addrhashmap.h",
+-  "sanitizer_allocator.h",
+-  "sanitizer_allocator_checks.h",
+-  "sanitizer_allocator_combined.h",
+-  "sanitizer_allocator_dlsym.h",
+-  "sanitizer_allocator_interface.h",
+-  "sanitizer_allocator_internal.h",
+-  "sanitizer_allocator_local_cache.h",
+-  "sanitizer_allocator_primary32.h",
+-  "sanitizer_allocator_primary64.h",
+-  "sanitizer_allocator_report.h",
+-  "sanitizer_allocator_secondary.h",
+-  "sanitizer_allocator_size_class_map.h",
+-  "sanitizer_allocator_stats.h",
+-  "sanitizer_array_ref.h",
+-  "sanitizer_asm.h",
+-  "sanitizer_atomic.h",
+-  "sanitizer_atomic_clang.h",
+-  "sanitizer_atomic_msvc.h",
+-  "sanitizer_bitvector.h",
+-  "sanitizer_bvgraph.h",
+-  "sanitizer_chained_origin_depot.h",
+-  "sanitizer_common.h",
+-  "sanitizer_common_interceptors.inc",
+-  "sanitizer_common_interceptors_format.inc",
+-  "sanitizer_common_interceptors_ioctl.inc",
+-  "sanitizer_common_interceptors_memintrinsics.inc",
+-  "sanitizer_common_interceptors_netbsd_compat.inc",
+-  "sanitizer_common_interface.inc",
+-  "sanitizer_common_interface_posix.inc",
+-  "sanitizer_common_syscalls.inc",
+-  "sanitizer_coverage_interface.inc",
+-  "sanitizer_dbghelp.h",
+-  "sanitizer_deadlock_detector.h",
+-  "sanitizer_deadlock_detector_interface.h",
+-  "sanitizer_dense_map.h",
+-  "sanitizer_dense_map_info.h",
+-  "sanitizer_dl.h",
+-  "sanitizer_errno.h",
+-  "sanitizer_errno_codes.h",
+-  "sanitizer_file.h",
+-  "sanitizer_flag_parser.h",
+-  "sanitizer_flags.h",
+-  "sanitizer_flags.inc",
+-  "sanitizer_flat_map.h",
+-  "sanitizer_fuchsia.h",
+-  "sanitizer_getauxval.h",
+-  "sanitizer_hash.h",
+-  "sanitizer_interceptors_ioctl_netbsd.inc",
+-  "sanitizer_interface_internal.h",
+-  "sanitizer_internal_defs.h",
+-  "sanitizer_leb128.h",
+-  "sanitizer_lfstack.h",
+-  "sanitizer_libc.h",
+-  "sanitizer_libignore.h",
+-  "sanitizer_linux.h",
+-  "sanitizer_list.h",
+-  "sanitizer_local_address_space_view.h",
+-  "sanitizer_lzw.h",
+-  "sanitizer_mac.h",
+-  "sanitizer_malloc_mac.inc",
+-  "sanitizer_mutex.h",
+-  "sanitizer_placement_new.h",
+-  "sanitizer_platform.h",
+-  "sanitizer_platform_interceptors.h",
+-  "sanitizer_platform_limits_netbsd.h",
+-  "sanitizer_platform_limits_posix.h",
+-  "sanitizer_platform_limits_solaris.h",
+-  "sanitizer_posix.h",
+-  "sanitizer_procmaps.h",
+-  "sanitizer_ptrauth.h",
+-  "sanitizer_quarantine.h",
+-  "sanitizer_range.h",
+-  "sanitizer_redefine_builtins.h",
+-  "sanitizer_report_decorator.h",
+-  "sanitizer_ring_buffer.h",
+-  "sanitizer_signal_interceptors.inc",
+-  "sanitizer_stack_store.h",
+-  "sanitizer_stackdepot.h",
+-  "sanitizer_stackdepotbase.h",
+-  "sanitizer_stacktrace.h",
+-  "sanitizer_stacktrace_printer.h",
+-  "sanitizer_stoptheworld.h",
+-  "sanitizer_suppressions.h",
+-  "sanitizer_symbolizer.h",
+-  "sanitizer_symbolizer_markup_constants.h",
+-  "sanitizer_symbolizer_internal.h",
+-  "sanitizer_symbolizer_libbacktrace.h",
+-  "sanitizer_symbolizer_mac.h",
+-  "sanitizer_symbolizer_markup.h",
+-  "sanitizer_syscall_generic.inc",
+-  "sanitizer_syscall_linux_aarch64.inc",
+-  "sanitizer_syscall_linux_arm.inc",
+-  "sanitizer_syscall_linux_x86_64.inc",
+-  "sanitizer_syscall_linux_riscv64.inc",
+-  "sanitizer_syscall_linux_loongarch64.inc",
+-  "sanitizer_syscalls_netbsd.inc",
+-  "sanitizer_thread_registry.h",
+-  "sanitizer_thread_safety.h",
+-  "sanitizer_tls_get_addr.h",
+-  "sanitizer_vector.h",
+-  "sanitizer_win.h",
+-  "sanitizer_win_defs.h",
+-  "sanitizer_win_interception.h",
+-  "sanitizer_win_thunk_interception.h",
++    "sancov_flags.h",
++    "sancov_flags.inc",
++    "sanitizer_addrhashmap.h",
++    "sanitizer_allocator.h",
++    "sanitizer_allocator_checks.h",
++    "sanitizer_allocator_combined.h",
++    "sanitizer_allocator_dlsym.h",
++    "sanitizer_allocator_interface.h",
++    "sanitizer_allocator_internal.h",
++    "sanitizer_allocator_local_cache.h",
++    "sanitizer_allocator_primary32.h",
++    "sanitizer_allocator_primary64.h",
++    "sanitizer_allocator_report.h",
++    "sanitizer_allocator_secondary.h",
++    "sanitizer_allocator_size_class_map.h",
++    "sanitizer_allocator_stats.h",
++    "sanitizer_array_ref.h",
++    "sanitizer_asm.h",
++    "sanitizer_atomic.h",
++    "sanitizer_atomic_clang.h",
++    "sanitizer_atomic_msvc.h",
++    "sanitizer_bitvector.h",
++    "sanitizer_bvgraph.h",
++    "sanitizer_chained_origin_depot.h",
++    "sanitizer_common.h",
++    "sanitizer_common_interceptors.inc",
++    "sanitizer_common_interceptors_format.inc",
++    "sanitizer_common_interceptors_ioctl.inc",
++    "sanitizer_common_interceptors_memintrinsics.inc",
++    "sanitizer_common_interceptors_netbsd_compat.inc",
++    "sanitizer_common_interface.inc",
++    "sanitizer_common_interface_posix.inc",
++    "sanitizer_common_syscalls.inc",
++    "sanitizer_coverage_interface.inc",
++    "sanitizer_dbghelp.h",
++    "sanitizer_deadlock_detector.h",
++    "sanitizer_deadlock_detector_interface.h",
++    "sanitizer_dense_map.h",
++    "sanitizer_dense_map_info.h",
++    "sanitizer_dl.h",
++    "sanitizer_errno.h",
++    "sanitizer_errno_codes.h",
++    "sanitizer_file.h",
++    "sanitizer_flag_parser.h",
++    "sanitizer_flags.h",
++    "sanitizer_flags.inc",
++    "sanitizer_flat_map.h",
++    "sanitizer_fuchsia.h",
++    "sanitizer_getauxval.h",
++    "sanitizer_hash.h",
++    "sanitizer_interceptors_ioctl_netbsd.inc",
++    "sanitizer_interface_internal.h",
++    "sanitizer_internal_defs.h",
++    "sanitizer_leb128.h",
++    "sanitizer_lfstack.h",
++    "sanitizer_libc.h",
++    "sanitizer_libignore.h",
++    "sanitizer_linux.h",
++    "sanitizer_list.h",
++    "sanitizer_local_address_space_view.h",
++    "sanitizer_lzw.h",
++    "sanitizer_mac.h",
++    "sanitizer_malloc_mac.inc",
++    "sanitizer_mutex.h",
++    "sanitizer_placement_new.h",
++    "sanitizer_platform.h",
++    "sanitizer_platform_interceptors.h",
++    "sanitizer_platform_limits_netbsd.h",
++    "sanitizer_platform_limits_posix.h",
++    "sanitizer_platform_limits_solaris.h",
++    "sanitizer_posix.h",
++    "sanitizer_procmaps.h",
++    "sanitizer_ptrauth.h",
++    "sanitizer_quarantine.h",
++    "sanitizer_range.h",
++    "sanitizer_redefine_builtins.h",
++    "sanitizer_report_decorator.h",
++    "sanitizer_ring_buffer.h",
++    "sanitizer_signal_interceptors.inc",
++    "sanitizer_stack_store.h",
++    "sanitizer_stackdepot.h",
++    "sanitizer_stackdepotbase.h",
++    "sanitizer_stacktrace.h",
++    "sanitizer_stacktrace_printer.h",
++    "sanitizer_stoptheworld.h",
++    "sanitizer_suppressions.h",
++    "sanitizer_symbolizer.h",
++    "sanitizer_symbolizer_markup_constants.h",
++    "sanitizer_symbolizer_internal.h",
++    "sanitizer_symbolizer_libbacktrace.h",
++    "sanitizer_symbolizer_mac.h",
++    "sanitizer_symbolizer_markup.h",
++    "sanitizer_syscall_generic.inc",
++    "sanitizer_syscall_linux_aarch64.inc",
++    "sanitizer_syscall_linux_arm.inc",
++    "sanitizer_syscall_linux_x86_64.inc",
++    "sanitizer_syscall_linux_riscv64.inc",
++    "sanitizer_syscall_linux_loongarch64.inc",
++    "sanitizer_syscalls_netbsd.inc",
++    "sanitizer_thread_registry.h",
++    "sanitizer_thread_safety.h",
++    "sanitizer_tls_get_addr.h",
++    "sanitizer_vector.h",
++    "sanitizer_win.h",
++    "sanitizer_win_defs.h",
++    "sanitizer_win_interception.h",
++    "sanitizer_win_thunk_interception.h",
+
+-  # Extra missing headers ?
+-  "sanitizer_type_traits.h",
+-  "sanitizer_platform_limits_freebsd.h",
+-  "sanitizer_thread_arg_retval.h",
+-  "sanitizer_mallinfo.h",
+-  "sanitizer_glibc_version.h",
+-  "sanitizer_thread_history.h",
+-  "sanitizer_solaris.h",
++    # Extra missing headers ?
++    "sanitizer_type_traits.h",
++    "sanitizer_platform_limits_freebsd.h",
++    "sanitizer_thread_arg_retval.h",
++    "sanitizer_mallinfo.h",
++    "sanitizer_glibc_version.h",
++    "sanitizer_thread_history.h",
++    "sanitizer_solaris.h",
+ ]
+
+ filegroup(
+@@ -992,11 +1023,19 @@
+
+ cc_library(
+     name = "sanitizer_common",
+-    copts = SANITIZER_CFLAGS,
+     srcs = [
++        ":interception_impl_headers_sources",
++        ":sanitizer_impl_headers_sources",
+         ":sanitizer_sources",
+-        ":sanitizer_impl_headers_sources",
+-        ":interception_impl_headers_sources",
++    ],
++    copts = SANITIZER_CFLAGS,
++    implementation_deps = [
++        ":libcxx_headers",
++        ":sanitizers_interface_headers",
++    ],
++    includes = [
++        "include",
++        "lib",
+     ],
+     textual_hdrs = [
+         "lib/builtins/assembly.h",
+@@ -1006,95 +1045,87 @@
+         "lib/sanitizer_common/sanitizer_syscall_generic.inc",
+         ":sanitizer_common_interceptors_vfork_sources",
+     ],
+-    includes = [
+-        "lib",
+-        "include",
+-    ],
+     alwayslink = True,
+-    implementation_deps = [
+-        ":libcxx_headers",
+-        ":sanitizers_interface_headers",
+-    ],
+ )
+
+ cc_library(
+     name = "sanitizer_common_libc",
+-    copts = SANITIZER_CFLAGS,
+     srcs = [
+-        ":sanitizer_libcdep_sources",
+         ":sanitizer_impl_headers_sources",
++        ":sanitizer_libcdep_sources",
+     ],
+-    includes = [
+-        "lib",
+-        "include",
+-    ],
+-    alwayslink = True,
++    copts = SANITIZER_CFLAGS,
+     implementation_deps = [
+         ":libcxx_headers",
+         ":sanitizers_interface_headers",
+     ],
++    includes = [
++        "include",
++        "lib",
++    ],
++    alwayslink = True,
+ )
+
+ cc_library(
+     name = "sanitizer_common_coverage",
+-    copts = SANITIZER_CFLAGS,
+     srcs = [
+         ":sanitizer_coverage_sources",
+         ":sanitizer_impl_headers_sources",
+     ],
+-    includes = [
+-        "lib",
+-        "include",
+-    ],
+-    alwayslink = True,
++    copts = SANITIZER_CFLAGS,
+     implementation_deps = [
+         ":libcxx_headers",
+         ":sanitizers_interface_headers",
+     ],
++    includes = [
++        "include",
++        "lib",
++    ],
++    alwayslink = True,
+ )
+
+ cc_library(
+     name = "sanitizer_common_symbolizer",
+-    copts = SANITIZER_CFLAGS,
+     srcs = [
+-        ":sanitizer_symbolizer_sources",
+         ":sanitizer_impl_headers_sources",
++        ":sanitizer_symbolizer_sources",
++    ],
++    copts = SANITIZER_CFLAGS,
++    implementation_deps = [
++        ":libcxx_headers",
++        ":sanitizers_interface_headers",
+     ],
+     includes = [
+-        "lib",
+         "include",
++        "lib",
+     ],
+     alwayslink = True,
+-    implementation_deps = [
+-        ":libcxx_headers",
+-        ":sanitizers_interface_headers",
+-    ],
+ )
+
+ cc_library(
+     name = "sanitizer_common_symbolizer_internal",
++    srcs = [
++        "lib/sanitizer_common/symbolizer/sanitizer_symbolize.cpp",
++        ":sanitizer_impl_headers_sources",
++    ],
+     copts = SANITIZER_CFLAGS + [
+         # The standalone build of the internal symbolizer strips the __cxa_atexit
+         # shim via internalize; do the same explicitly to avoid duplicate symbols
+         # when statically linking against libc implementations that provide it.
+         "-DSANITIZER_SKIP_CXA_ATEXIT_OVERRIDE",
+     ],
+-    srcs = [
+-        "lib/sanitizer_common/symbolizer/sanitizer_symbolize.cpp",
+-        ":sanitizer_impl_headers_sources",
+-    ],
+-    deps = [
+-        ":llvm_Symbolize",
+-    ],
+-    includes = [
+-        "lib",
+-        "include",
+-    ],
+-    alwayslink = True,
+     implementation_deps = [
+         ":libcxx_headers",
+         ":sanitizers_interface_headers",
+     ],
++    includes = [
++        "include",
++        "lib",
++    ],
++    deps = [
++        ":llvm_Symbolize",
++    ],
++    alwayslink = True,
+ )
+
+ ###
+@@ -1102,10 +1133,10 @@
+ ###
+
+ INTERCEPTION_SOURCES = [
+-  "interception_linux.cpp",
+-  "interception_mac.cpp",
+-  "interception_win.cpp",
+-  "interception_type_test.cpp",
++    "interception_linux.cpp",
++    "interception_mac.cpp",
++    "interception_win.cpp",
++    "interception_type_test.cpp",
+ ]
+
+ filegroup(
+@@ -1114,10 +1145,10 @@
+ )
+
+ INTERCEPTION_HEADERS = [
+-  "interception.h",
+-  "interception_linux.h",
+-  "interception_mac.h",
+-  "interception_win.h",
++    "interception.h",
++    "interception_linux.h",
++    "interception_mac.h",
++    "interception_win.h",
+ ]
+
+ filegroup(
+@@ -1131,17 +1162,17 @@
+
+ cc_library(
+     name = "interception",
+-    copts = INTERCEPTION_FLAGS,
+     srcs = [
+-        ":interception_sources",
+         ":interception_headers",
++        ":interception_sources",
+         ":sanitizer_impl_headers_sources",
+     ],
++    copts = INTERCEPTION_FLAGS,
++    implementation_deps = [
++        ":libcxx_headers",
++    ],
+     includes = ["lib"],
+     alwayslink = True,
+-    implementation_deps = [
+-        ":libcxx_headers",
+-    ],
+ )
+
+ ###
+@@ -1149,12 +1180,12 @@
+ ###
+
+ UBSAN_SOURCES = [
+-  "ubsan_diag.cpp",
+-  "ubsan_init.cpp",
+-  "ubsan_flags.cpp",
+-  "ubsan_handlers.cpp",
+-  "ubsan_monitor.cpp",
+-  "ubsan_value.cpp",
++    "ubsan_diag.cpp",
++    "ubsan_init.cpp",
++    "ubsan_flags.cpp",
++    "ubsan_handlers.cpp",
++    "ubsan_monitor.cpp",
++    "ubsan_value.cpp",
+ ]
+
+ filegroup(
+@@ -1163,9 +1194,9 @@
+ )
+
+ UBSAN_STANDALONE_SOURCES = [
+-  "ubsan_diag_standalone.cpp",
+-  "ubsan_init_standalone.cpp",
+-  "ubsan_signals_standalone.cpp",
++    "ubsan_diag_standalone.cpp",
++    "ubsan_init_standalone.cpp",
++    "ubsan_signals_standalone.cpp",
+ ]
+
+ filegroup(
+@@ -1174,10 +1205,10 @@
+ )
+
+ UBSAN_CXXABI_SOURCES = [
+-  "ubsan_handlers_cxx.cpp",
+-  "ubsan_type_hash.cpp",
+-  "ubsan_type_hash_itanium.cpp",
+-  "ubsan_type_hash_win.cpp"
++    "ubsan_handlers_cxx.cpp",
++    "ubsan_type_hash.cpp",
++    "ubsan_type_hash_itanium.cpp",
++    "ubsan_type_hash_win.cpp",
+ ]
+
+ filegroup(
+@@ -1186,19 +1217,19 @@
+ )
+
+ UBSAN_HEADERS = [
+-  "ubsan_checks.inc",
+-  "ubsan_diag.h",
+-  "ubsan_flags.h",
+-  "ubsan_flags.inc",
+-  "ubsan_handlers.h",
+-  "ubsan_handlers_cxx.h",
+-  "ubsan_init.h",
+-  "ubsan_interface.inc",
+-  "ubsan_monitor.h",
+-  "ubsan_platform.h",
+-  "ubsan_signals_standalone.h",
+-  "ubsan_type_hash.h",
+-  "ubsan_value.h"
++    "ubsan_checks.inc",
++    "ubsan_diag.h",
++    "ubsan_flags.h",
++    "ubsan_flags.inc",
++    "ubsan_handlers.h",
++    "ubsan_handlers_cxx.h",
++    "ubsan_init.h",
++    "ubsan_interface.inc",
++    "ubsan_monitor.h",
++    "ubsan_platform.h",
++    "ubsan_signals_standalone.h",
++    "ubsan_type_hash.h",
++    "ubsan_value.h",
+ ]
+
+ filegroup(
+@@ -1223,22 +1254,22 @@
+ # avoid duplicate interceptor symbols.
+ cc_library(
+     name = "ubsan_no_standalone",
+-    copts = UBSAN_CFLAGS,
+     srcs = [
++        ":ubsan_headers",
+         ":ubsan_sources",
+-        ":ubsan_headers",
+     ],
++    copts = UBSAN_CFLAGS,
++    implementation_deps = [
++        ":interception_impl_headers",
++        ":libcxx_headers",
++        ":sanitizer_impl_headers",
++    ],
++    includes = ["lib"],
+     textual_hdrs = [
+         "lib/ubsan/ubsan_checks.inc",
+         "lib/ubsan/ubsan_flags.inc",
+     ],
+     alwayslink = True,
+-    includes = ["lib"],
+-    implementation_deps = [
+-        ":libcxx_headers",
+-        ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+-    ],
+ )
+
+ UBSAN_CXX_SOURCES = [
+@@ -1247,53 +1278,54 @@
+
+ cc_library(
+     name = "ubsan_cxx",
+-    copts = UBSAN_CXXFLAGS,
+     srcs = UBSAN_CXX_SOURCES + [
+         ":ubsan_headers",
+     ],
++    copts = UBSAN_CXXFLAGS,
+     deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
+ )
+
+ cc_library(
+     name = "ubsan_preinit",
+-    copts = UBSAN_CFLAGS,
+     srcs = [
+         "lib/ubsan/ubsan_init_standalone_preinit.cpp",
+         ":ubsan_headers",
+     ],
++    copts = UBSAN_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
+ )
+
+ cc_library(
+     name = "ubsan_standalone",
+     srcs = [
++        ":ubsan_headers",
+         ":ubsan_sources",
+         ":ubsan_standalone_sources",
+-        ":ubsan_headers",
+     ],
++    implementation_deps = [
++        ":interception_impl_headers",
++        ":libcxx_headers",
++        ":sanitizer_impl_headers",
++    ],
++    includes = ["lib"],
+     textual_hdrs = [
+         "lib/ubsan/ubsan_checks.inc",
+         "lib/ubsan/ubsan_flags.inc",
+     ],
+     alwayslink = True,
+-    includes = ["lib"],
+-    implementation_deps = [
+-        ":libcxx_headers",
+-        ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+-    ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "ubsan_standalone.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":ubsan_preinit",
+         ":ubsan_standalone",
+@@ -1306,15 +1338,14 @@
+         # if COMPILER_RT_ENABLE_INTERNAL_SYMBOLIZER
+         ":llvm_Symbolize",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "ubsan_standalone_cxx.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":ubsan_cxx",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1346,58 +1377,58 @@
+
+ cc_library(
+     name = "cfi",
+-    copts = CFI_CFLAGS,
+     srcs = [
+         ":cfi_sources",
+         ":ubsan_headers",
+     ],
+-    includes = ["lib"],
++    copts = CFI_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
++    includes = ["lib"],
+ )
+
+ cc_library(
+     name = "cfi_diag",
+-    copts = CFI_CFLAGS + CFI_DIAG_CFLAGS,
+     srcs = [
+         ":cfi_sources",
+         ":ubsan_headers",
+     ],
+-    includes = ["lib"],
++    copts = CFI_CFLAGS + CFI_DIAG_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
++    includes = ["lib"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "cfi.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":cfi",
+         ":interception",
+         ":sanitizer_common",
+         ":sanitizer_common_libc",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "cfi_diag.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":cfi_diag",
+         ":interception",
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+         ":ubsan_no_standalone",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1405,15 +1436,15 @@
+ ###
+
+ MSAN_RTL_SOURCES = [
+-  "msan.cpp",
+-  "msan_allocator.cpp",
+-  "msan_chained_origin_depot.cpp",
+-  "msan_dl.cpp",
+-  "msan_interceptors.cpp",
+-  "msan_linux.cpp",
+-  "msan_report.cpp",
+-  "msan_thread.cpp",
+-  "msan_poisoning.cpp",
++    "msan.cpp",
++    "msan_allocator.cpp",
++    "msan_chained_origin_depot.cpp",
++    "msan_dl.cpp",
++    "msan_interceptors.cpp",
++    "msan_linux.cpp",
++    "msan_report.cpp",
++    "msan_thread.cpp",
++    "msan_poisoning.cpp",
+ ]
+
+ filegroup(
+@@ -1422,7 +1453,7 @@
+ )
+
+ MSAN_CXX_SOURCES = [
+-  "msan_new_delete.cpp",
++    "msan_new_delete.cpp",
+ ]
+
+ filegroup(
+@@ -1458,63 +1489,63 @@
+
+ cc_library(
+     name = "msan",
+-    copts = MSAN_RTL_CFLAGS,
+     srcs = [
+-        ":msan_rtl_sources",
+         ":msan_rtl_headers",
++        ":msan_rtl_sources",
+         ":ubsan_headers",
+     ],
+-    textual_hdrs = [
+-        "lib/msan/msan_flags.inc",
+-    ],
+-    includes = ["lib"],
++    copts = MSAN_RTL_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/msan/msan_flags.inc",
+     ],
+ )
+
+ cc_library(
+     name = "msan_cxx",
+-    copts = MSAN_RTL_CFLAGS,
+     srcs = [
+         ":msan_rtl_cxx_sources",
+         ":msan_rtl_headers",
+         ":ubsan_headers",
+     ],
+-    textual_hdrs = [
+-        "lib/msan/msan_flags.inc",
+-    ],
+-    includes = ["lib"],
++    copts = MSAN_RTL_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/msan/msan_flags.inc",
+     ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "msan.static",
++    visibility = ["//visibility:public"],
+     deps = [
++        ":interception",
+         ":msan",
+-        ":interception",
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+         ":ubsan_no_standalone",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "msan_cxx.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":msan_cxx",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1563,24 +1594,25 @@
+
+ cc_library(
+     name = "dfsan",
+-    copts = DFSAN_RTL_CFLAGS,
+     srcs = [
++        ":dfsan_rtl_headers",
+         ":dfsan_rtl_sources",
+-        ":dfsan_rtl_headers",
+     ],
+-    textual_hdrs = [
+-        "lib/dfsan/dfsan_flags.inc",
+-    ],
+-    includes = ["lib"],
++    copts = DFSAN_RTL_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/dfsan/dfsan_flags.inc",
+     ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "dfsan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":dfsan",
+         ":interception",
+@@ -1589,7 +1621,6 @@
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ sh_script(
+@@ -1599,12 +1630,12 @@
+         "lib/dfsan/libc_ubuntu1404_abilist.txt",
+     ],
+     outs = ["share/dfsan_abilist.txt"],
+-    cmd = "cat $1 $2 > $3",
+     args = [
+         "$(location lib/dfsan/done_abilist.txt)",
+         "$(location lib/dfsan/libc_ubuntu1404_abilist.txt)",
+         "$(location share/dfsan_abilist.txt)",
+     ],
++    cmd = "cat $1 $2 > $3",
+     visibility = ["//visibility:public"],
+ )
+
+@@ -1662,51 +1693,51 @@
+
+ cc_library(
+     name = "nsan",
+-    copts = NSAN_CFLAGS,
+     srcs = [
++        ":nsan_headers",
+         ":nsan_sources",
+-        ":nsan_headers",
+     ],
+-    textual_hdrs = [
+-        "lib/nsan/nsan_flags.inc",
+-    ],
+-    includes = ["lib"],
++    copts = NSAN_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/nsan/nsan_flags.inc",
+     ],
+ )
+
+ cc_library(
+     name = "nsan_preinit",
+-    copts = NSAN_CFLAGS,
+     srcs = [
+-        ":nsan_preinit_sources",
+         ":nsan_headers",
++        ":nsan_preinit_sources",
+     ],
+-    includes = ["lib"],
++    copts = NSAN_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
++    includes = ["lib"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "nsan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":nsan_preinit",
++        ":interception",
+         ":nsan",
+-        ":interception",
++        ":nsan_preinit",
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+         ":ubsan_no_standalone",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1736,26 +1767,26 @@
+
+ cc_library(
+     name = "safestack",
+-    copts = SAFESTACK_CFLAGS,
+     srcs = [
+-        ":safestack_sources",
+         ":safestack_headers",
++        ":safestack_sources",
+     ],
+-    includes = ["lib"],
++    copts = SAFESTACK_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
++    includes = ["lib"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "safestack.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":safestack",
+         ":interception",
++        ":safestack",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1763,13 +1794,13 @@
+ ###
+
+ RTSAN_CXX_SOURCES = [
+-  "rtsan.cpp",
+-  "rtsan_context.cpp",
+-  "rtsan_diagnostics.cpp",
+-  "rtsan_flags.cpp",
+-  "rtsan_interceptors_posix.cpp",
+-  "rtsan_stats.cpp",
+-  "rtsan_suppressions.cpp",
++    "rtsan.cpp",
++    "rtsan_context.cpp",
++    "rtsan_diagnostics.cpp",
++    "rtsan_flags.cpp",
++    "rtsan_interceptors_posix.cpp",
++    "rtsan_stats.cpp",
++    "rtsan_suppressions.cpp",
+ ]
+
+ filegroup(
+@@ -1816,36 +1847,36 @@
+
+ cc_library(
+     name = "rtsan",
+-    copts = RTSAN_CFLAGS,
+     srcs = [
++        ":rtsan_headers",
+         ":rtsan_preinit_sources",
+         ":rtsan_sources",
+-        ":rtsan_headers",
+     ],
++    copts = RTSAN_CFLAGS,
++    implementation_deps = [
++        ":interception_impl_headers",
++        ":libcxx_headers",
++        ":sanitizer_impl_headers",
++    ],
++    includes = ["lib"],
+     textual_hdrs = [
+         "lib/rtsan/rtsan_checks.inc",
+         "lib/rtsan/rtsan_flags.inc",
+     ],
+-    includes = ["lib"],
+-    implementation_deps = [
+-        ":libcxx_headers",
+-        ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+-    ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "rtsan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":rtsan",
+         ":interception",
++        ":rtsan",
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1853,8 +1884,8 @@
+ ###
+
+ TYSAN_SOURCES = [
+-  "tysan.cpp",
+-  "tysan_interceptors.cpp",
++    "tysan.cpp",
++    "tysan_interceptors.cpp",
+ ]
+
+ filegroup(
+@@ -1884,32 +1915,32 @@
+
+ cc_library(
+     name = "tysan",
+-    copts = TYSAN_CFLAGS,
+     srcs = [
++        ":tysan_headers",
+         ":tysan_sources",
+-        ":tysan_headers",
+     ],
+-    textual_hdrs = [
+-        "lib/tysan/tysan_flags.inc",
+-    ],
+-    includes = ["lib"],
++    copts = TYSAN_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/tysan/tysan_flags.inc",
+     ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "tysan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":tysan",
+         ":interception",
+         ":sanitizer_common",
+         ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
++        ":tysan",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -1917,33 +1948,33 @@
+ ###
+
+ TSAN_RTL_SOURCES = [
+-  "tsan_debugging.cpp",
+-  "tsan_external.cpp",
+-  "tsan_fd.cpp",
+-  "tsan_flags.cpp",
+-  "tsan_ignoreset.cpp",
+-  "tsan_interceptors_memintrinsics.cpp",
+-  "tsan_interceptors_posix.cpp",
+-  "tsan_interface.cpp",
+-  "tsan_interface_ann.cpp",
+-  "tsan_interface_atomic.cpp",
+-  "tsan_interface_java.cpp",
+-  "tsan_malloc_mac.cpp",
+-  "tsan_md5.cpp",
+-  "tsan_mman.cpp",
+-  "tsan_mutexset.cpp",
+-  "tsan_report.cpp",
+-  "tsan_rtl.cpp",
+-  "tsan_rtl_access.cpp",
+-  "tsan_rtl_mutex.cpp",
+-  "tsan_rtl_proc.cpp",
+-  "tsan_rtl_report.cpp",
+-  "tsan_rtl_thread.cpp",
+-  "tsan_stack_trace.cpp",
+-  "tsan_suppressions.cpp",
+-  "tsan_symbolize.cpp",
+-  "tsan_sync.cpp",
+-  "tsan_vector_clock.cpp",
++    "tsan_debugging.cpp",
++    "tsan_external.cpp",
++    "tsan_fd.cpp",
++    "tsan_flags.cpp",
++    "tsan_ignoreset.cpp",
++    "tsan_interceptors_memintrinsics.cpp",
++    "tsan_interceptors_posix.cpp",
++    "tsan_interface.cpp",
++    "tsan_interface_ann.cpp",
++    "tsan_interface_atomic.cpp",
++    "tsan_interface_java.cpp",
++    "tsan_malloc_mac.cpp",
++    "tsan_md5.cpp",
++    "tsan_mman.cpp",
++    "tsan_mutexset.cpp",
++    "tsan_report.cpp",
++    "tsan_rtl.cpp",
++    "tsan_rtl_access.cpp",
++    "tsan_rtl_mutex.cpp",
++    "tsan_rtl_proc.cpp",
++    "tsan_rtl_report.cpp",
++    "tsan_rtl_thread.cpp",
++    "tsan_stack_trace.cpp",
++    "tsan_suppressions.cpp",
++    "tsan_symbolize.cpp",
++    "tsan_sync.cpp",
++    "tsan_vector_clock.cpp",
+ ]
+
+ filegroup(
+@@ -1972,7 +2003,7 @@
+ )
+
+ TSAN_CXX_SOURCES = [
+-  "tsan_new_delete.cpp",
++    "tsan_new_delete.cpp",
+ ]
+
+ filegroup(
+@@ -2029,67 +2060,67 @@
+
+ cc_library(
+     name = "tsan",
+-    copts = TSAN_RTL_CFLAGS,
+     srcs = [
+-        ":tsan_rtl_sources",
++        "lib/builtins/assembly.h",
+         ":tsan_preinit_sources",
+         ":tsan_rtl_headers",
++        ":tsan_rtl_sources",
+         ":ubsan_headers",
+-        "lib/builtins/assembly.h",
+     ],
+-    textual_hdrs = [
+-        "lib/tsan/rtl/tsan_flags.inc",
+-        "lib/tsan/rtl/tsan_interface.inc",
+-    ],
+-    includes = ["lib"],
++    copts = TSAN_RTL_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/tsan/rtl/tsan_flags.inc",
++        "lib/tsan/rtl/tsan_interface.inc",
+     ],
+ )
+
+ cc_library(
+     name = "tsan_cxx",
+-    copts = TSAN_RTL_CFLAGS,
+     srcs = [
+         ":tsan_rtl_cxx_sources",
+         ":tsan_rtl_headers",
+         ":ubsan_headers",
+     ],
+-    textual_hdrs = [
+-        "lib/tsan/rtl/tsan_flags.inc",
+-        "lib/tsan/rtl/tsan_interface.inc",
+-    ],
+-    includes = ["lib"],
++    copts = TSAN_RTL_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/tsan/rtl/tsan_flags.inc",
++        "lib/tsan/rtl/tsan_interface.inc",
+     ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "tsan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":tsan",
+         ":interception",
+         ":sanitizer_common",
++        ":sanitizer_common_coverage",
+         ":sanitizer_common_libc",
+-        ":sanitizer_common_coverage",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
++        ":tsan",
+         ":ubsan_no_standalone",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "tsan_cxx.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":tsan_cxx",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -2159,59 +2190,59 @@
+ # itself is not enabled.
+ cc_library(
+     name = "lsan_common",
+-    copts = LSAN_CFLAGS,
+     srcs = [
+         ":lsan_common_sources",
+         ":lsan_headers",
+     ],
++    copts = LSAN_CFLAGS,
++    implementation_deps = [
++        ":libcxx_headers",
++    ],
++    includes = ["lib"],
+     textual_hdrs = [
+         "lib/lsan/lsan_flags.inc",
+     ],
+-    includes = ["lib"],
+-    alwayslink = True,
+     deps = [
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+     ],
+-    implementation_deps = [
+-        ":libcxx_headers",
+-    ],
++    alwayslink = True,
+ )
+
+ cc_library(
+     name = "lsan",
+-    copts = LSAN_CFLAGS,
+     srcs = [
+-        ":lsan_sources",
+         ":lsan_headers",
++        ":lsan_sources",
+     ],
+-    textual_hdrs = [
+-        "lib/lsan/lsan_flags.inc",
+-    ],
+-    includes = ["lib"],
++    copts = LSAN_CFLAGS,
+     implementation_deps = [
++        ":interception_impl_headers",
+         ":libcxx_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
++    ],
++    includes = ["lib"],
++    textual_hdrs = [
++        "lib/lsan/lsan_flags.inc",
+     ],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "lsan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":lsan",
+         ":interception",
++        ":lsan",
++        ":lsan_common",
+         ":sanitizer_common",
++        ":sanitizer_common_coverage",
+         ":sanitizer_common_libc",
+-        ":sanitizer_common_coverage",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+-        ":lsan_common",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ ###
+@@ -2258,7 +2289,7 @@
+             "lib/asan/asan_interceptors_vfork.S",
+         ],
+         "//conditions:default": [],
+-    })
++    }),
+ )
+
+ ASAN_CXX_SOURCES = [
+@@ -2340,63 +2371,63 @@
+     copts = ASAN_CFLAGS,
+     deps = [
+         ":interception",
++        ":lsan_common",
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+-        ":lsan_common",
+         ":ubsan_no_standalone",
+     ],
+ )
+
+ cc_library(
+     name = "asan_cxx",
+-    copts = ASAN_CFLAGS,
+     srcs = [
+         ":asan_cxx_sources",
+         ":asan_headers",
+     ],
++    copts = ASAN_CFLAGS,
++    implementation_deps = [
++        ":libcxx_headers",
++    ],
+     deps = [
+-        ":sanitizer_impl_headers",
+         ":interception_impl_headers",
+-    ],
+-    implementation_deps = [
+-        ":libcxx_headers",
++        ":sanitizer_impl_headers",
+     ],
+ )
+
+ cc_library(
+     name = "asan_preinit",
+-    copts = ASAN_CFLAGS,
+     srcs = [
++        ":asan_headers",
+         ":asan_preinit_sources",
+-        ":asan_headers",
+     ],
++    copts = ASAN_CFLAGS,
+     deps = [
+-        ":sanitizer_impl_headers",
+         ":interception_impl_headers",
++        ":sanitizer_impl_headers",
+     ],
+ )
+
+ cc_library(
+     name = "asan_static",
+-    copts = ASAN_CFLAGS,
+     srcs = [
+-        ":asan_static_sources",
+         ":asan_headers",
++        ":asan_static_sources",
+     ],
++    copts = ASAN_CFLAGS,
+     deps = [
++        ":interception_impl_headers",
+         ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+     ],
+ )
+
+ cc_library(
+     name = "asan",
+     srcs = [
+-        ":asan_sources",
+         ":asan_headers",
++        ":asan_sources",
+         ":ubsan_headers",
+     ],
+     copts = [
+@@ -2411,27 +2442,27 @@
+             "-fvisibility-inlines-hidden",
+         ],
+     }),
++    implementation_deps = [
++        ":interception_impl_headers",
++        ":libcxx_headers",
++        ":lsan_common_headers",
++        ":sanitizer_impl_headers",
++    ],
++    includes = ["lib"],
+     textual_hdrs = [
+         "lib/asan/asan_activation_flags.inc",
+         "lib/asan/asan_flags.inc",
+         "lib/asan/asan_interface.inc",
+         ":sanitizer_common_interceptors_vfork_sources",
+     ],
+-    includes = ["lib"],
+-    implementation_deps = [
+-        ":libcxx_headers",
+-        ":sanitizer_impl_headers",
+-        ":interception_impl_headers",
+-        ":lsan_common_headers",
+-    ],
+     deps = [
+         ":interception",
++        ":lsan_common",
+         ":sanitizer_common",
+-        ":sanitizer_common_libc",
+         ":sanitizer_common_coverage",
++        ":sanitizer_common_libc",
+         ":sanitizer_common_symbolizer",
+         ":sanitizer_common_symbolizer_internal",
+-        ":lsan_common",
+     ],
+ )
+
+@@ -2447,46 +2478,41 @@
+
+ cc_runtime_stage0_static_library(
+     name = "asan.static",
++    visibility = ["//visibility:public"],
+     deps = [
+-        ":asan_preinit",
+         ":asan",
+         ":asan_common_runtime",
++        ":asan_preinit",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "asan_cxx.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":asan_cxx",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ # asan_static.static
+ cc_runtime_stage0_static_library(
+     name = "asan_static.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":asan_static",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+
+ cc_runtime_stage0_static_library(
+     name = "asan_preinit.static",
++    visibility = ["//visibility:public"],
+     deps = [
+         ":asan_preinit",
+     ],
+-    visibility = ["//visibility:public"],
+ )
+-
+
+ cc_runtime_stage0_shared_library(
+     name = "asan.shared",
+-    deps = [
+-        ":asan_common_runtime",
+-        ":asan_dynamic",
+-    ],
+     additional_linker_inputs = select({
+         "@llvm//platforms/config:gnu": [
+             "@llvm//runtimes/glibc:glibc_library_search_directory",
+@@ -2496,6 +2522,7 @@
+         ],
+         "//conditions:default": [],
+     }),
++    shared_lib_name = "libasan.shared.so",
+     user_link_flags = select({
+         "@llvm//platforms/config:gnu": [
+             "-L$(location @llvm//runtimes/glibc:glibc_library_search_directory)",
+@@ -2507,6 +2534,9 @@
+         ],
+         "//conditions:default": [],
+     }),
+-    shared_lib_name = "libasan.shared.so",
+     visibility = ["//visibility:public"],
++    deps = [
++        ":asan_common_runtime",
++        ":asan_dynamic",
++    ],
+ )
+Index: 3rd_party/llvm-project/21.x/compiler-rt/targets.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/3rd_party/llvm-project/21.x/compiler-rt/targets.bzl b/3rd_party/llvm-project/21.x/compiler-rt/targets.bzl
+--- a/3rd_party/llvm-project/21.x/compiler-rt/targets.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/3rd_party/llvm-project/21.x/compiler-rt/targets.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -1,11 +1,11 @@
+-load("@rules_cc//cc:cc_library.bzl", "cc_library")
+ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
++load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ """
+ Helper functions for defining targets.
+ """
++
+ def atomic_helper_cc_library(name, pat, size, model):
+-
+     unique_filename = "lse_{}_{}_{}".format(pat, size, model)
+
+     # cc_library will always produce an archive file containing lse.o.
+@@ -21,6 +21,10 @@
+     cc_library(
+         name = name,
+         srcs = [unique_filename],
++        features = select({
++            "@platforms//os:windows": ["-pic"],
++            "//conditions:default": [],
++        }),
+         copts = [
+             # Normally, we would pass -nostdinc, but since we pass -nostdlibinc
+             # from the runtimes toolchain args regarless, having them both cause a
+Index: 3rd_party/llvm-project/21.x/libcxx/libcxx.BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/3rd_party/llvm-project/21.x/libcxx/libcxx.BUILD.bazel b/3rd_party/llvm-project/21.x/libcxx/libcxx.BUILD.bazel
+--- a/3rd_party/llvm-project/21.x/libcxx/libcxx.BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/3rd_party/llvm-project/21.x/libcxx/libcxx.BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -2,9 +2,9 @@
+ load("@bazel_skylib//lib:selects.bzl", "selects")
+ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+ load("@bazel_skylib//rules:write_file.bzl", "write_file")
++load("@llvm//toolchain/runtimes:cc_runtime_shared_library.bzl", "cc_runtime_stage1_shared_library")
++load("@llvm//toolchain/runtimes:cc_runtime_static_library.bzl", "cc_runtime_stage0_static_library")
+ load("@rules_cc//cc:cc_library.bzl", "cc_library")
+-load("@llvm//toolchain/runtimes:cc_runtime_static_library.bzl", "cc_runtime_stage0_static_library")
+-load("@llvm//toolchain/runtimes:cc_runtime_shared_library.bzl", "cc_runtime_stage1_shared_library")
+
+ # Should replicate libcxx/include/CMakeLists.txt
+ filegroup(
+@@ -1243,7 +1243,6 @@
+     copts = [
+         "-faligned-allocation",
+         "-std=c++23",
+-
+         "-fvisibility=hidden",
+         "-fvisibility-inlines-hidden",
+
+@@ -1412,9 +1411,13 @@
+         "@llvm//platforms/config:gnu": [
+             "@glibc//:gnu_libc_headers",
+         ],
+-        "@platforms//os:windows": [
+-            "@mingw//:mingw_headers",
+-        ],
++        # "@llvm//platforms/config:abi_gnu": [
++        #     "@mingw//:mingw_headers",
++        # ],
++        # "@llvm//platforms/config:abi_msvc": [
++        #     # TODO: check if it is releavant to wire SDK headers and user-provided MSVC runtime headers here
++        # ],
++        "@platforms//os:windows": [],  # FIXME: replace by the above
+         "@platforms//os:macos": [],
+     }),
+ )
+Index: 3rd_party/llvm-project/21.x/libcxxabi/libcxxabi.BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/3rd_party/llvm-project/21.x/libcxxabi/libcxxabi.BUILD.bazel b/3rd_party/llvm-project/21.x/libcxxabi/libcxxabi.BUILD.bazel
+--- a/3rd_party/llvm-project/21.x/libcxxabi/libcxxabi.BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/3rd_party/llvm-project/21.x/libcxxabi/libcxxabi.BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -1,9 +1,9 @@
+ load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+ load("@bazel_skylib//lib:selects.bzl", "selects")
+-load("@rules_cc//cc:cc_library.bzl", "cc_library")
+ load("@llvm//toolchain/runtimes:cc_runtime_library.bzl", "cc_runtime_stage0_library")
++load("@llvm//toolchain/runtimes:cc_runtime_shared_library.bzl", "cc_runtime_stage0_shared_library")
+ load("@llvm//toolchain/runtimes:cc_runtime_static_library.bzl", "cc_runtime_stage0_static_library")
+-load("@llvm//toolchain/runtimes:cc_runtime_shared_library.bzl", "cc_runtime_stage0_shared_library")
++load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ filegroup(
+     name = "libcxxabi_headers_files",
+@@ -70,7 +70,7 @@
+     copts = [
+         "-std=c++23",
+         "-fstrict-aliasing",
+-        "-funwind-tables",   # if exceptions
++        "-funwind-tables",  # if exceptions
+         # "-fno-exceptions", # if no exceptions
+     ] + select({
+         "@platforms//os:windows": [
+@@ -146,9 +146,13 @@
+         "@llvm//platforms/config:gnu": [
+             "@glibc//:gnu_libc_headers",
+         ],
+-        "@platforms//os:windows": [
+-            "@mingw//:mingw_headers",
+-        ],
++        # "@llvm//platforms/config:abi_gnu": [
++        #     "@mingw//:mingw_headers",
++        # ],
++        # "@llvm//platforms/config:abi_msvc": [
++        #     # TODO: check if it is releavant to wire SDK headers and user-provided MSVC runtime headers here
++        # ],
++        "@platforms//os:windows": [],  # FIXME: replace by the above
+         "@platforms//os:macos": [],
+     }),
+ )
+Index: 3rd_party/llvm-project/21.x/libunwind/libunwind.BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/3rd_party/llvm-project/21.x/libunwind/libunwind.BUILD.bazel b/3rd_party/llvm-project/21.x/libunwind/libunwind.BUILD.bazel
+--- a/3rd_party/llvm-project/21.x/libunwind/libunwind.BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/3rd_party/llvm-project/21.x/libunwind/libunwind.BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -1,10 +1,8 @@
+-
+-
+-load("@rules_cc//cc:cc_library.bzl", "cc_library")
+ load("@bazel_skylib//lib:selects.bzl", "selects")
+ load("@llvm//toolchain/runtimes:cc_runtime_library.bzl", "cc_runtime_stage0_library")
+-load("@llvm//toolchain/runtimes:cc_runtime_static_library.bzl", "cc_runtime_stage0_static_library")
+ load("@llvm//toolchain/runtimes:cc_runtime_shared_library.bzl", "cc_runtime_stage1_shared_library")
++load("@llvm//toolchain/runtimes:cc_runtime_static_library.bzl", "cc_runtime_stage0_static_library")
++load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ selects.config_setting_group(
+     name = "windows_static",
+@@ -31,7 +29,7 @@
+         "-Wno-dll-attribute-on-redeclaration",
+     ] + select({
+         "@platforms//os:windows": [
+-            "-Wno-macro-redefined", # TODO(zbarsky): Is this masking a real issue?
++            "-Wno-macro-redefined",  # TODO(zbarsky): Is this masking a real issue?
+             "-Wno-missing-declarations",
+             "-Wno-pragma-pack",
+             "-Wno-typedef-redefinition",
+@@ -83,12 +81,10 @@
+         "src/libunwind.cpp",
+         "src/Unwind-EHABI.cpp",
+         "src/Unwind-seh.cpp",
+-
+         "src/UnwindLevel1.c",
+         "src/UnwindLevel1-gcc-ext.c",
+         "src/Unwind-sjlj.c",
+         "src/Unwind-wasm.c",
+-
+         "src/UnwindRegistersRestore.S",
+         "src/UnwindRegistersSave.S",
+
+@@ -109,8 +105,15 @@
+         "@llvm//platforms/config:gnu": [
+             "@glibc//:gnu_libc_headers",
+         ],
++        # "@llvm//platforms/config:abi_gnu": [
++        #     "@mingw//:mingw_headers",
++        # ],
++        # "@llvm//platforms/config:abi_msvc": [
++        #     # TODO: check if it is releavant to wire SDK headers and user-provided MSVC runtime headers here
++        # ],
+         "@platforms//os:windows": [
+-            "@mingw//:mingw_headers",
++            # FIXME: replace by the above
++            # "@msvc//:headers_include",
+         ],
+         "@platforms//os:macos": [],
+     }),
+Index: MODULE.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/MODULE.bazel b/MODULE.bazel
+--- a/MODULE.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/MODULE.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -94,6 +94,10 @@
+ mingw = use_extension("//runtimes/mingw/extension:mingw.bzl", "mingw")
+ use_repo(mingw, "mingw")
+
++msvc = use_extension("//runtimes/msvc/extension:msvc.bzl", "msvc")
++msvc.winsysroot()
++use_repo(msvc, "windows_sdk", "windows_sdk_arm64", "windows_sdk_x64")
++
+ osx = use_extension("//extensions:osx.bzl", "osx")
+ use_repo(osx, "macos_sdk")
+
+@@ -113,7 +117,6 @@
+
+ bazel_dep(name = "gazelle", version = "0.47.0", dev_dependency = True)
+ bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.9.0", dev_dependency = True)
+-
+ bazel_dep(name = "buildifier_prebuilt", version = "8.2.1", dev_dependency = True)
+ bazel_dep(name = "bazelrc-preset.bzl", version = "1.6.0", dev_dependency = True)
+
+Index: constraints/abi/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/constraints/abi/BUILD.bazel b/constraints/abi/BUILD.bazel
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/constraints/abi/BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,17 @@
++load(":declare_abis_constraints.bzl", "declare_abis_constraints")
++
++package(default_visibility = ["//visibility:public"])
++
++# TODO: is this really needed?
++constraint_setting(
++    name = "variant",
++    # For windows, this maps to a default gnu
++    default_constraint_value = "unconstrained",
++)
++
++constraint_value(
++    name = "unconstrained",
++    constraint_setting = "variant",
++)
++
++declare_abis_constraints()
+Index: constraints/abi/abis.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/constraints/abi/abis.bzl b/constraints/abi/abis.bzl
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/constraints/abi/abis.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,7 @@
++# TODO: unsure about the ABI name, it's not really an ABI
++ABIS = [
++    "gnu",
++    "msvc",
++]
++
++DEFAULT_ABI = "gnu"
+Index: constraints/abi/declare_abis_constraints.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/constraints/abi/declare_abis_constraints.bzl b/constraints/abi/declare_abis_constraints.bzl
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/constraints/abi/declare_abis_constraints.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,8 @@
++load(":abis.bzl", "ABIS")
++
++def declare_abis_constraints():
++    for abi in ABIS:
++        native.constraint_value(
++            name = abi,
++            constraint_setting = "variant",
++        )
+Index: extensions/toolchain.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/extensions/toolchain.bzl b/extensions/toolchain.bzl
+--- a/extensions/toolchain.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/extensions/toolchain.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -64,11 +64,11 @@
+     attrs = {
+         "os": attr.string(
+             mandatory = True,
+-            values = ["linux", "macos"],
++            values = ["linux", "macos", "windows"],
+         ),
+         "arch": attr.string(
+             mandatory = True,
+-            values = ["x86_64", "aarch64"]
++            values = ["x86_64", "aarch64"],
+         ),
+     },
+ )
+Index: platforms/common.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/platforms/common.bzl b/platforms/common.bzl
+--- a/platforms/common.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/platforms/common.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -26,3 +26,8 @@
+     ("linux", "x86_64"),
+     ("linux", "aarch64"),
+ ]
++
++ABI_SUPPORTED_TARGETS = [
++    ("windows", "x86_64"),
++    ("windows", "aarch64"),
++]
+Index: platforms/config/declare_config_settings.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/platforms/config/declare_config_settings.bzl b/platforms/config/declare_config_settings.bzl
+--- a/platforms/config/declare_config_settings.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/platforms/config/declare_config_settings.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -1,6 +1,7 @@
+-load("//platforms:common.bzl", "SUPPORTED_TARGETS", "LIBC_SUPPORTED_TARGETS")
+ load("@bazel_skylib//lib:selects.bzl", "selects")
+-load("//constraints/libc:libc_versions.bzl", "LIBCS", "GLIBCS")
++load("//constraints/abi:abis.bzl", "ABIS")
++load("//constraints/libc:libc_versions.bzl", "GLIBCS", "LIBCS")
++load("//platforms:common.bzl", "ABI_SUPPORTED_TARGETS", "LIBC_SUPPORTED_TARGETS", "SUPPORTED_TARGETS")
+
+ def declare_config_settings():
+     for (target_os, target_cpu) in SUPPORTED_TARGETS:
+@@ -26,6 +27,7 @@
+         )
+
+     declare_config_settings_libc_aware()
++    declare_config_settings_abi_aware()
+
+ def declare_config_settings_libc_aware():
+     for (target_os, target_cpu) in LIBC_SUPPORTED_TARGETS:
+@@ -53,7 +55,8 @@
+     selects.config_setting_group(
+         name = "gnu",
+         match_any = [
+-            "//constraints/libc:{}".format(libc) for libc in GLIBCS
++            "//constraints/libc:{}".format(libc)
++            for libc in GLIBCS
+         ] + [
+             "{}_{}_unconstrained".format(target_os, target_cpu)
+             for (target_os, target_cpu) in LIBC_SUPPORTED_TARGETS
+@@ -68,3 +71,24 @@
+         ],
+         visibility = ["//visibility:public"],
+     )
++
++def declare_config_settings_abi_aware():
++    for abi in ABIS + ["unconstrained"]:
++        for (target_os, target_cpu) in ABI_SUPPORTED_TARGETS:
++            native.config_setting(
++                name = "{}_{}_{}".format(target_os, target_cpu, abi),
++                constraint_values = [
++                    "@platforms//cpu:{}".format(target_cpu),
++                    "@platforms//os:{}".format(target_os),
++                    "//constraints/abi:{}".format(abi),
++                ],
++                visibility = ["//visibility:public"],
++            )
++
++        native.config_setting(
++            name = "abi_{}".format(abi),
++            constraint_values = [
++                "//constraints/abi:{}".format(abi),
++            ],
++            visibility = ["//visibility:public"],
++        )
+Index: platforms/declare_platforms.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/platforms/declare_platforms.bzl b/platforms/declare_platforms.bzl
+--- a/platforms/declare_platforms.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/platforms/declare_platforms.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -1,10 +1,9 @@
+-
+-load("//platforms:common.bzl", "ARCH_ALIASES", "SUPPORTED_TARGETS", "LIBC_SUPPORTED_TARGETS")
+-load("//constraints/libc:libc_versions.bzl", "LIBCS", "DEFAULT_LIBC")
++load("//constraints/abi:abis.bzl", "ABIS", "DEFAULT_ABI")
++load("//constraints/libc:libc_versions.bzl", "DEFAULT_LIBC", "LIBCS")
++load("//platforms:common.bzl", "ABI_SUPPORTED_TARGETS", "ARCH_ALIASES", "LIBC_SUPPORTED_TARGETS", "SUPPORTED_TARGETS")
+
+ def declare_platforms():
+     for (target_os, target_cpu) in SUPPORTED_TARGETS:
+-
+         constraints = [
+             "@platforms//cpu:{}".format(target_cpu),
+             "@platforms//os:{}".format(target_os),
+@@ -21,6 +20,17 @@
+             # constraint if they want to.
+             constraints.append("//constraints/libc:{}".format(DEFAULT_LIBC))
+
++        if target_os == "windows":
++            # We add a default abi constraint for windows platforms.
++            #
++            # This is needed because some toolchains require an abi constraint
++            # to be present on the platform in order to select the right
++            # toolchain implementation.
++            #
++            # Users can still create their own platforms without an abi
++            # constraint if they want to.
++            constraints.append("//constraints/abi:{}".format(DEFAULT_ABI))
++
+         native.platform(
+             name = "{}_{}".format(target_os, target_cpu),
+             constraint_values = constraints,
+@@ -35,6 +45,7 @@
+             )
+
+     declare_platforms_libc_aware()
++    declare_platforms_abi_aware()
+
+ def declare_platforms_libc_aware():
+     for target_os, target_cpu in LIBC_SUPPORTED_TARGETS:
+@@ -59,3 +70,27 @@
+                     ],
+                     visibility = ["//visibility:public"],
+                 )
++
++def declare_platforms_abi_aware():
++    for target_os, target_cpu in ABI_SUPPORTED_TARGETS:
++        for abi in ABIS:
++            native.platform(
++                name = "{}_{}_{}".format(target_os, target_cpu, abi),
++                constraint_values = [
++                    "@platforms//cpu:{}".format(target_cpu),
++                    "@platforms//os:{}".format(target_os),
++                    "//constraints/abi:{}".format(abi),
++                ],
++                visibility = ["//visibility:public"],
++            )
++
++            for alias in ARCH_ALIASES.get(target_cpu, []):
++                native.platform(
++                    name = "{}_{}_{}".format(target_os, alias, abi),
++                    constraint_values = [
++                        "@platforms//cpu:{}".format(target_cpu),
++                        "@platforms//os:{}".format(target_os),
++                        "//constraints/abi:{}".format(abi),
++                    ],
++                    visibility = ["//visibility:public"],
++                )
+Index: runtimes/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/runtimes/BUILD.bazel b/runtimes/BUILD.bazel
+--- a/runtimes/BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/runtimes/BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -73,6 +73,14 @@
+     visibility = ["//visibility:public"],
+ )
+
++filegroup(
++    name = "windows_msvc_runtime_lib",
++    srcs = [
++        "@compiler-rt//:clang_rt.builtins.static",
++    ],
++    visibility = ["//visibility:public"],
++)
++
+ cc_library(
+     name = "empty",
+     srcs = ["empty.c"],
+Index: runtimes/msvc/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/runtimes/msvc/BUILD.bazel b/runtimes/msvc/BUILD.bazel
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/runtimes/msvc/BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,10 @@
++load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
++
++copy_to_directory(
++    name = "msvc_import_libraries_directory",
++    srcs = select({
++        "@platforms//cpu:x86_64": ["@windows_sdk_x64//:libs"],
++        "@platforms//cpu:aarch64": ["@windows_sdk_arm64//:libs"],
++    }),
++    visibility = ["//visibility:public"],
++)
+Index: runtimes/msvc/BUILD_windows_sdk.tpl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/runtimes/msvc/BUILD_windows_sdk.tpl b/runtimes/msvc/BUILD_windows_sdk.tpl
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/runtimes/msvc/BUILD_windows_sdk.tpl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,9 @@
++package(default_visibility = ["//visibility:public"])
++
++filegroup(
++    name = "libs",
++    srcs = glob([
++        "c/ucrt/*/*.lib",
++        "c/um/*/*.lib",
++    ]),
++)
+Index: runtimes/msvc/BUILD_windows_sdk_common.tpl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/runtimes/msvc/BUILD_windows_sdk_common.tpl b/runtimes/msvc/BUILD_windows_sdk_common.tpl
+new file mode 100644
+--- /dev/null	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
++++ b/runtimes/msvc/BUILD_windows_sdk_common.tpl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -0,0 +1,11 @@
++load("@bazel_skylib//rules/directory:directory.bzl", "directory")
++load("@bazel_skylib//rules/directory:subdirectory.bzl", "subdirectory")
++load("@toolchains_llvm_bootstrapped//:directory.bzl", "headers_directory")
++
++package(default_visibility = ["//visibility:public"])
++
++headers_directory(
++    name = "headers_include",
++    path = "c/Include",
++    visibility = ["//visibility:public"],
++)
+Index: toolchain/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/BUILD.bazel b/toolchain/BUILD.bazel
+--- a/toolchain/BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -95,10 +95,16 @@
+         "@platforms//os:linux": [
+             "//toolchain/args:crt_search_directory",
+         ],
+-        "@platforms//os:windows": [
++        "@platforms//os:windows": [],
++        "@platforms//os:none": [],
++    }) + select({
++        "//platforms/config:windows_x86_64_gnu": [
+             "//toolchain/args:crt_search_directory",
+         ],
+-        "@platforms//os:none": [],
++        "//platforms/config:windows_aarch64_gnu": [
++            "//toolchain/args:crt_search_directory",
++        ],
++        "//conditions:default": [],
+     }),
+ )
+
+@@ -168,6 +174,7 @@
+         "@platforms//os:macos": [
+             "//toolchain/args/macos:macos_sdk_sysroot",
+         ],
++        "@platforms//os:windows": [],
+         "//conditions:default": [
+             "//toolchain/args:empty_sysroot_flags",
+         ],
+@@ -253,8 +260,14 @@
+     name = "windows_toolchain_args",
+     args = [
+         "//toolchain/args:libcxx_headers_include_search_paths",
+-        "//toolchain/args/windows:mingw_headers_include_search_paths",
+-    ],
++    ] + select({
++        "//platforms/config:abi_gnu": [
++            "//toolchain/args/windows:mingw_headers_include_search_paths",
++        ],
++        "//conditions:default": [
++            "//toolchain/args/windows:msvc_headers_include_search_paths",
++        ],
++    }),
+ )
+
+ cc_args_list(
+@@ -297,13 +310,43 @@
+         "//toolchain/args:lsan_flags",
+
+         # Common default link flags.
+-        "//toolchain/args:fuse_ld",
+-        ":libcxx_library_search_paths",
+-        ":libunwind_library_search_paths",
+-        ":rtlib",
+-        ":stdlib",
+-        ":unwindlib",
+-        ":resource_dir",
++    ] + select({
++        "//platforms/config:windows_x86_64_gnu": ["//toolchain/args:llvm_target_for_platform_link"],
++        "//platforms/config:windows_aarch64_gnu": ["//toolchain/args:llvm_target_for_platform_link"],
++        "@platforms//os:windows": [],
++        "//conditions:default": ["//toolchain/args:llvm_target_for_platform_link"],
++    }) + select({
++        "//platforms/config:windows_x86_64_gnu": ["//toolchain/args:fuse_ld"],
++        "//platforms/config:windows_aarch64_gnu": ["//toolchain/args:fuse_ld"],
++        "@platforms//os:windows": [],
++        "//conditions:default": ["//toolchain/args:fuse_ld"],
++    }) + select({
++        "//platforms/config:windows_x86_64_gnu": [
++            ":libcxx_library_search_paths",
++            ":libunwind_library_search_paths",
++            ":rtlib",
++            ":stdlib",
++            ":unwindlib",
++            ":resource_dir",
++        ],
++        "//platforms/config:windows_aarch64_gnu": [
++            ":libcxx_library_search_paths",
++            ":libunwind_library_search_paths",
++            ":rtlib",
++            ":stdlib",
++            ":unwindlib",
++            ":resource_dir",
++        ],
++        "@platforms//os:windows": [],
++        "//conditions:default": [
++            ":libcxx_library_search_paths",
++            ":libunwind_library_search_paths",
++            ":rtlib",
++            ":stdlib",
++            ":unwindlib",
++            ":resource_dir",
++        ],
++    }) + [
+         "//toolchain/args:validate_static_library_args",
+         ":default_link_flags",
+         # Needs to stay out of resource_dir since clang does not always search for crtstuff for all targets.
+Index: toolchain/args/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/args/BUILD.bazel b/toolchain/args/BUILD.bazel
+--- a/toolchain/args/BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/args/BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -37,6 +37,15 @@
+     name = "llvm_target_for_platform",
+     actions = [
+         "@rules_cc//cc/toolchains/actions:compile_actions",
++    ],
++    args = [
++        "-target",
++    ] + LLVM_TARGET_TRIPLE,
++)
++
++cc_args(
++    name = "llvm_target_for_platform_link",
++    actions = [
+         "@rules_cc//cc/toolchains/actions:link_actions",
+     ],
+     args = [
+Index: toolchain/args/llvm_target_triple.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/args/llvm_target_triple.bzl b/toolchain/args/llvm_target_triple.bzl
+--- a/toolchain/args/llvm_target_triple.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/args/llvm_target_triple.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -6,8 +6,12 @@
+     "@llvm//platforms/config:linux_aarch64_musl": ["aarch64-linux-musl"],
+     "@llvm//platforms/config:macos_x86_64": ["x86_64-apple-darwin"],
+     "@llvm//platforms/config:macos_aarch64": ["aarch64-apple-darwin"],
+-    "@llvm//platforms/config:windows_x86_64": ["x86_64-w64-windows-gnu"],
+-    "@llvm//platforms/config:windows_aarch64": ["aarch64-w64-windows-gnu"],
++    "@llvm//platforms/config:windows_x86_64_gnu": ["x86_64-w64-windows-gnu"],
++    "@llvm//platforms/config:windows_aarch64_gnu": ["aarch64-w64-windows-gnu"],
++    "@llvm//platforms/config:windows_x86_64_msvc": ["x86_64-pc-windows-msvc"],
++    "@llvm//platforms/config:windows_aarch64_msvc": ["aarch64-pc-windows-msvc"],
++    "@llvm//platforms/config:windows_x86_64": ["x86_64-pc-windows-msvc"],
++    "@llvm//platforms/config:windows_aarch64": ["aarch64-pc-windows-msvc"],
+     "@llvm//platforms/config:none_wasm32": ["wasm32-unknown-unknown"],
+     "@llvm//platforms/config:none_wasm64": ["wasm64-unknown-unknown"],
+ }, no_match_error = "Unsupported platform")
+Index: toolchain/args/windows/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/args/windows/BUILD.bazel b/toolchain/args/windows/BUILD.bazel
+--- a/toolchain/args/windows/BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/args/windows/BUILD.bazel	(revision f09c5c406011aea1f49915af44e5f4cdb4a850fc)
+@@ -38,7 +38,7 @@
+ )
+
+ cc_args(
+-    name = "default_libs",
++    name = "default_libs_gnu",
+     actions = [
+         "@rules_cc//cc/toolchains/actions:link_actions",
+     ],
+@@ -61,3 +61,98 @@
+         "mingw_import_library_search_path": "//runtimes/mingw:mingw_import_libraries_directory",
+     },
+ )
++
++cc_args(
++    name = "msvc_winsysroot",
++    actions = [
++        "@rules_cc//cc/toolchains/actions:compile_actions",
++        "@rules_cc//cc/toolchains/actions:link_actions",
++    ],
++    args = [
++        "--winsysroot={winsysroot}",
++    ],
++    data = [
++        "@windows_sdk//:sysroot_directory",
++    ],
++    format = {
++        "winsysroot": "@windows_sdk//:sysroot_directory",
++    },
++)
++
++cc_args(
++    name = "msvc_headers_include_search_paths",
++    actions = [
++        "@rules_cc//cc/toolchains/actions:source_compile_actions",
++    ],
++    allowlist_include_directories = [
++        "//:builtin_headers",
++        "@windows_sdk//:msvc_include",
++        "@windows_sdk//:winsdk_ucrt_include",
++        "@windows_sdk//:winsdk_shared_include",
++        "@windows_sdk//:winsdk_um_include",
++        "@windows_sdk//:winsdk_winrt_include",
++    ],
++    args = [
++        "-isystem",
++        "{builtin_headers}",
++        "-isystem",
++        "{msvc_include}",
++        "-isystem",
++        "{winsdk_ucrt_include}",
++        "-isystem",
++        "{winsdk_shared_include}",
++        "-isystem",
++        "{winsdk_um_include}",
++        "-isystem",
++        "{winsdk_winrt_include}",
++    ],
++    data = [
++        "//:builtin_headers",
++        "@windows_sdk//:msvc_include",
++        "@windows_sdk//:winsdk_shared_include",
++        "@windows_sdk//:winsdk_ucrt_include",
++        "@windows_sdk//:winsdk_um_include",
++        "@windows_sdk//:winsdk_winrt_include",
++    ],
++    format = {
++        "builtin_headers": "//:builtin_headers",
++        "msvc_include": "@windows_sdk//:msvc_include",
++        "winsdk_ucrt_include": "@windows_sdk//:winsdk_ucrt_include",
++        "winsdk_shared_include": "@windows_sdk//:winsdk_shared_include",
++        "winsdk_um_include": "@windows_sdk//:winsdk_um_include",
++        "winsdk_winrt_include": "@windows_sdk//:winsdk_winrt_include",
++    },
++)
++
++cc_args(
++    name = "default_libs_msvc",
++    actions = [
++        "@rules_cc//cc/toolchains/actions:link_actions",
++    ],
++    args = [
++        "{compiler_rt_builtins}",
++        "/LIBPATH:{msvc_lib}",
++        "/LIBPATH:{winsdk_ucrt_lib}",
++        "/LIBPATH:{winsdk_um_lib}",
++    ],
++    data = [
++        "//runtimes/compiler-rt:clang_rt.builtins.static",
++        "@windows_sdk//:msvc_lib",
++        "@windows_sdk//:winsdk_ucrt_lib",
++        "@windows_sdk//:winsdk_um_lib",
++    ],
++    format = {
++        "compiler_rt_builtins": "//runtimes/compiler-rt:clang_rt.builtins.static",
++        "msvc_lib": "@windows_sdk//:msvc_lib",
++        "winsdk_ucrt_lib": "@windows_sdk//:winsdk_ucrt_lib",
++        "winsdk_um_lib": "@windows_sdk//:winsdk_um_lib",
++    },
++)
++
++alias(
++    name = "default_libs",
++    actual = select({
++        "//platforms/config:abi_gnu": ":default_libs_gnu",
++        "//conditions:default": ":default_libs_msvc",
++    }),
++)
+Index: toolchain/cc_toolchain.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/cc_toolchain.bzl b/toolchain/cc_toolchain.bzl
+--- a/toolchain/cc_toolchain.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/cc_toolchain.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -1,8 +1,7 @@
+-load("@rules_cc//cc/toolchains:toolchain.bzl", _cc_toolchain = "cc_toolchain")
+ load("@rules_cc//cc/toolchains:feature_set.bzl", "cc_feature_set")
++load("@rules_cc//cc/toolchains:toolchain.bzl", _cc_toolchain = "cc_toolchain")
+
+ def cc_toolchain(name, tool_map, module_map = None):
+-
+     cc_feature_set(
+         name = name + "_known_features",
+         all_of = [
+@@ -11,12 +10,14 @@
+             "@llvm//toolchain/features:static_link_cpp_runtimes",
+             "@llvm//toolchain/features/runtime_library_search_directories:feature",
+             "@llvm//toolchain/features:archive_param_file",
+-            "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
+         ] + select({
+             "@platforms//os:linux": [
+                 "@rules_cc//cc/toolchains/args/thin_lto:feature",
+             ],
+-            "//conditions:default": [],
++            "@platforms//os:windows": [],
++            "//conditions:default": [
++                "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
++            ],
+         }) + [
+             # Those features are enabled internally by --compilation_mode flags family.
+             # We add them to the list of known_features but not in the list of enabled_features.
+@@ -29,13 +30,16 @@
+
+     cc_feature_set(
+         name = name + "_runtimes_only_known_features",
+-        all_of = [
++        all_of = select({
++            "@platforms//os:windows": [],
++            "//conditions:default": [
++                "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
++            ],
++        }) + [
+             # TODO(zbarsky): Do we want layering check for runtime libs?
+             #"@rules_cc//cc/toolchains/args/layering_check:layering_check",
+             #"@rules_cc//cc/toolchains/args/layering_check:use_module_maps",
+-
+             "@llvm//toolchain/features:archive_param_file",
+-            "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
+             # Always last (contains user_compile_flags and user_link_flags who should apply last).
+             "@llvm//toolchain/features/legacy:experimental_replace_legacy_action_config_features",
+         ],
+@@ -55,7 +59,6 @@
+             ],
+             "@platforms//os:none": [],
+         }) + [
+-            "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
+             "@rules_cc//cc/toolchains/args/layering_check:module_maps",
+             # These are "enabled" but they only _actually_ get enabled when the underlying compilation mode is set.
+             # This lets us properly order them before user_compile_flags and user_link_flags below.
+@@ -66,13 +69,22 @@
+             "@llvm//toolchain/features/legacy:all_legacy_builtin_features",
+             # Always last (contains user_compile_flags and user_link_flags who should apply last).
+             "@llvm//toolchain/features/legacy:experimental_replace_legacy_action_config_features",
+-        ],
++        ] + select({
++            "@platforms//os:windows": [],
++            "//conditions:default": [
++                "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
++            ],
++        }),
+     )
+
+     cc_feature_set(
+         name = name + "_runtimes_only_enabled_features",
+-        all_of = [
+-            "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
++        all_of = select({
++            "@platforms//os:windows": [],
++            "//conditions:default": [
++                "@llvm//toolchain/features:prefer_pic_for_opt_binaries",
++            ],
++        }) + [
+             "@llvm//toolchain/features:archive_param_file",
+             # Always last (contains user_compile_flags and user_link_flags who should apply last).
+             "@llvm//toolchain/features/legacy:experimental_replace_legacy_action_config_features",
+@@ -115,11 +127,17 @@
+         static_runtime_lib = select({
+             "@llvm//toolchain:runtimes_none": "@llvm//runtimes:none",
+             "@llvm//toolchain:runtimes_stage1": "@llvm//runtimes:none",
++            "@llvm//platforms/config:windows_x86_64_gnu": "@llvm//runtimes:static_runtime_lib",
++            "@llvm//platforms/config:windows_aarch64_gnu": "@llvm//runtimes:static_runtime_lib",
++            "@platforms//os:windows": "@llvm//runtimes:none",
+             "//conditions:default": "@llvm//runtimes:static_runtime_lib",
+         }),
+         dynamic_runtime_lib = select({
+             "@llvm//toolchain:runtimes_none": "@llvm//runtimes:none",
+             "@llvm//toolchain:runtimes_stage1": "@llvm//runtimes:none",
++            "@llvm//platforms/config:windows_x86_64_gnu": "@llvm//runtimes:dynamic_runtime_lib",
++            "@llvm//platforms/config:windows_aarch64_gnu": "@llvm//runtimes:dynamic_runtime_lib",
++            "@platforms//os:windows": "@llvm//runtimes:none",
+             "//conditions:default": "@llvm//runtimes:dynamic_runtime_lib",
+         }),
+         compiler = "clang",
+Index: toolchain/features/legacy/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/features/legacy/BUILD.bazel b/toolchain/features/legacy/BUILD.bazel
+--- a/toolchain/features/legacy/BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/features/legacy/BUILD.bazel	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -73,7 +73,6 @@
+     all_of = [
+         ":backfill_legacy_args",
+         "@rules_cc//cc/toolchains/args/archiver_flags:feature",
+-        "@rules_cc//cc/toolchains/args/pic_flags:feature",
+         "@rules_cc//cc/toolchains/args/libraries_to_link:feature",
+         "@rules_cc//cc/toolchains/args/linker_param_file:feature",
+         "@rules_cc//cc/toolchains/args/preprocessor_defines:feature",
+@@ -97,7 +96,12 @@
+         "@rules_cc//cc/toolchains/args/library_search_directories:feature",
+         "@rules_cc//cc/toolchains/args/dependency_file:feature",
+         "@rules_cc//cc/toolchains/args/compile_flags:feature",  # NOTE: This should come below default flags so user flags can override them
+-    ],
++    ] + select({
++        "@platforms//os:windows": [],
++        "//conditions:default": [
++            "@rules_cc//cc/toolchains/args/pic_flags:feature",
++        ],
++    }),
+     visibility = ["//visibility:public"],
+ )
+
+Index: toolchain/llvm/llvm.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/llvm/llvm.bzl b/toolchain/llvm/llvm.bzl
+--- a/toolchain/llvm/llvm.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/llvm/llvm.bzl	(revision f09c5c406011aea1f49915af44e5f4cdb4a850fc)
+@@ -1,12 +1,12 @@
+ load("@bazel_lib//lib:copy_file.bzl", "copy_file")
++load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+ load("@bazel_skylib//rules/directory:directory.bzl", "directory")
+ load("@bazel_skylib//rules/directory:subdirectory.bzl", "subdirectory")
+-load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+ load("@rules_cc//cc/toolchains:tool.bzl", "cc_tool")
+ load("@rules_cc//cc/toolchains:tool_map.bzl", "cc_tool_map")
+-load("//runtimes:module_map.bzl", "module_map", "include_path")
+-load("//toolchain:selects.bzl", "platform_extra_binary")
+ load("//:directory.bzl", "headers_directory")
++load("//runtimes:module_map.bzl", "include_path", "module_map")
++load("//toolchain:selects.bzl", "platform_extra_binary")
+
+ def declare_llvm_targets(*, suffix = ""):
+     headers_directory(
+@@ -22,7 +22,7 @@
+     copied_headers = []
+     for file in native.glob(["lib/clang/**"]):
+         copy_file(
+-            name  = "copy_" + file,
++            name = "copy_" + file,
+             src = file,
+             out = "prebuilts/" + file,
+         )
+@@ -118,6 +118,19 @@
+         visibility = ["//visibility:public"],
+     )
+
++    cc_tool_map(
++        name = "tools_for_msvc",  # TODO: unsure about that
++        tools = COMMON_TOOLS | {
++            "@rules_cc//cc/toolchains/actions:assembly_actions": ":clang-no-pic",
++            "@rules_cc//cc/toolchains/actions:c_compile": ":clang-no-pic",
++            "@rules_cc//cc/toolchains/actions:objc_compile": ":clang-no-pic",
++            "@llvm//toolchain:cpp_compile_actions_without_header_parsing": ":clang++-no-pic",
++            "@rules_cc//cc/toolchains/actions:ar_actions": ":llvm-ar",
++            "@rules_cc//cc/toolchains/actions:link_actions": ":lld-link",
++        },
++        visibility = ["//visibility:public"],
++    )
++
+     cc_tool(
+         name = "clang",
+         src = "bin/clang" + suffix,
+@@ -138,6 +151,36 @@
+         allowlist_include_directories = [":builtin_headers"],
+     )
+
++    cc_tool(
++        name = "clang-no-pic",
++        src = "bin/clang" + suffix,
++        data = [
++            ":builtin_headers",
++        ],
++        capabilities = [],
++        allowlist_include_directories = [":builtin_headers"],
++    )
++
++    cc_tool(
++        name = "clang++-no-pic",
++        src = "bin/clang++" + suffix,
++        data = [
++            ":builtin_headers",
++        ],
++        capabilities = [],
++        allowlist_include_directories = [":builtin_headers"],
++    )
++
++    cc_tool(
++        name = "clang-cl",
++        src = "bin/clang-cl" + suffix,
++        data = [
++            ":builtin_headers",
++        ],
++        capabilities = [],  # no pic support when targetting MSVC
++        allowlist_include_directories = [":builtin_headers"],
++    )
++
+     cc_tool(
+         name = "lld",
+         src = "bin/clang++" + suffix,
+@@ -149,6 +192,20 @@
+         ],
+     )
+
++    cc_tool(
++        # TODO: unsure if needed
++        name = "link-lld",
++        src = "bin/link-lld" + suffix,
++        data = [
++            "bin/link-lld" + suffix,
++        ],
++    )
++
++    cc_tool(
++        name = "lld-link",
++        src = "bin/lld-link" + suffix,
++    )
++
+     cc_tool(
+         name = "llvm-ar",
+         src = "bin/llvm-ar" + suffix,
+@@ -193,7 +250,7 @@
+             "@llvm//sanitizers:sanitizers_headers_include_search_directory",
+         ] + select({
+             "@llvm//platforms/config:musl": [
+-                "@llvm//runtimes/musl:musl_headers_include_search_directory"
++                "@llvm//runtimes/musl:musl_headers_include_search_directory",
+             ],
+             "@llvm//platforms/config:gnu": [
+                 "@llvm//runtimes/glibc:glibc_headers_include_search_directory",
+Index: toolchain/runtimes/BUILD.bazel
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/runtimes/BUILD.bazel b/toolchain/runtimes/BUILD.bazel
+--- a/toolchain/runtimes/BUILD.bazel	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/runtimes/BUILD.bazel	(revision b7fdc4a1412f99e7637aff59d274b5a2e523298c)
+@@ -30,6 +30,20 @@
+         "@platforms//os:linux": [],
+         "@platforms//os:windows": [],
+         "@platforms//os:none": [],
++    }) + select({
++        "//platforms/config:windows_x86_64_gnu": [
++            "//toolchain/args/windows:mingw_headers_include_search_paths",
++        ],
++        "//platforms/config:windows_aarch64_gnu": [
++            "//toolchain/args/windows:mingw_headers_include_search_paths",
++        ],
++        "//platforms/config:windows_x86_64": [
++            "//toolchain/args/windows:msvc_headers_include_search_paths",
++        ],
++        "//platforms/config:windows_aarch64": [
++            "//toolchain/args/windows:msvc_headers_include_search_paths",
++        ],
++        "//conditions:default": [],
+     }),
+     visibility = ["//toolchain:__subpackages__"],
+ )
+@@ -100,6 +114,7 @@
+         "//toolchain/runtimes/args:lsan_flags",
+
+         # Common default link flags.
++        "//toolchain/args:llvm_target_for_platform_link",
+         "//toolchain/args:fuse_ld",
+         ":rtlib",
+         ":resource_dir",
+Index: toolchain/selects.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/toolchain/selects.bzl b/toolchain/selects.bzl
+--- a/toolchain/selects.bzl	(revision e8874240347055b4f44780bc49d1224f63bb8c08)
++++ b/toolchain/selects.bzl	(revision 780cc1b5f16e023960cfe0f05392b0c41efc4b13)
+@@ -40,5 +40,9 @@
+     # See https://github.com/bazelbuild/bazel/issues/27623#issuecomment-3529439585 for more details.
+     return select({
+         "@rules_cc//cc/toolchains/args/archiver_flags:use_libtool_on_macos_setting": tool_repo + ":tools_with_libtool",
++        "@llvm//platforms/config:windows_x86_64_gnu": tool_repo + ":default_tools",
++        "@llvm//platforms/config:windows_aarch64_gnu": tool_repo + ":default_tools",
++        "@llvm//platforms/config:windows_x86_64": tool_repo + ":tools_for_msvc",
++        "@llvm//platforms/config:windows_aarch64": tool_repo + ":tools_for_msvc",
+         "//conditions:default": tool_repo + ":default_tools",
+     })
+Index: config/defs.bzl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/config/defs.bzl b/config/defs.bzl
+--- a/config/defs.bzl	(revision e55eb0897213816d7abd7f7083ee78fd0dd30f3e)
++++ b/config/defs.bzl	(revision b7fdc4a1412f99e7637aff59d274b5a2e523298c)
+@@ -139,7 +139,7 @@
+     # for a dynamically linked unwinder.
+     bool_flag(
+         name = "experimental_stub_libgcc_s",
+-        build_setting_default = False,
++        build_setting_default = True,
+     )
+
+     for sanitizer in SANITIZERS:
+diff --git a/runtimes/msvc/extension/BUILD.bazel b/runtimes/msvc/extension/BUILD.bazel
+new file mode 100644

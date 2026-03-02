@@ -36,11 +36,13 @@ LINUX_X86_64_GLIBC_CONSTRAINTS = [
 WINDOWS_AARCH64_CONSTRAINTS = [
     "@platforms//cpu:arm64",
     "@platforms//os:windows",
+    "@llvm//platforms/config:abi_msvc",
 ]
 
 WINDOWS_X86_64_CONSTRAINTS = [
     "@platforms//cpu:x86_64",
     "@platforms//os:windows",
+    "@llvm//platforms/config:abi_msvc",
 ]
 
 # Platform definitions
@@ -133,6 +135,7 @@ platform(
     parents = ["@platforms//host"],
     constraint_values = [
       "@rules_rs//rs/experimental/platforms/constraints:windows_msvc",
+      "@llvm//platforms/config:abi_msvc",
     ]
 )
 

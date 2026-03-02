@@ -14,58 +14,14 @@ single_version_override(
     module_name = "llvm",
     patch_strip = 1,
     patches = [
-        # "@//:build/native/llvm/llvm_fetch.patch" #  keep until https://github.com/cerisier/toolchains_llvm_bootstrapped/issues/346
+        "//:build/native/llvm/llvm_msvc.patch",  # MSVC support
     ],
 )
+
+msvc = use_extension("@llvm//runtimes/msvc/extension:msvc.bzl", "msvc")
+msvc.winsysroot()
+use_repo(msvc, "windows_sdk", "windows_sdk_x64", "windows_sdk_arm64")
 register_toolchains("@llvm//toolchain:all")
-
-windows_sysroot_transformations = {
-    "include/driverspecs.h": "include/DriverSpecs.h",  # Linux respects case, and some of our source files in transitive dependencies mention `DriverSpecs.h` and not `driverspecs.h`
-    "include/specstrings.h": "include/SpecStrings.h",  # Linux respects case, and some of our source files in transitive dependencies mention `SpecStrings.h` and not `specstrings.h`
-    "**/*.h": "lowercase",  # Create lowercase duplicates of .h files
-    "**/*.lib": "lowercase",  # Create lowercase duplicates of .lib files
-    "**/*.Lib": "lowercase",  # Create lowercase duplicates of .Lib files
-}
-
-crossplatform_local_archive = use_repo_rule("//:defs.bzl", "crossplatform_local_archive")
-local_archive = use_repo_rule("//:defs.bzl", "local_archive")
-
-local_archive(
-    # see `sysroots/README.md` to understand how this sysroot is built
-    name = "sysroot-darwin",
-    src = "//sysroots:sysroot-macos-SDK_15.5-5185e391ddaec47fc3c03b0bd85082b1.tar.gz",
-    build_file = "@//sysroots:BUILD.darwin",
-)
-
-crossplatform_local_archive(
-    # see `sysroots/README.md` to understand how this sysroot is built
-    name = "sysroot-windows_aarch64",
-    src = "//sysroots:sysroot-windows_aarch64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
-    build_file = "@//sysroots:BUILD.windows_aarch64",
-    transformations = windows_sysroot_transformations,
-)
-
-crossplatform_local_archive(
-    # see `sysroots/README.md` to understand how this sysroot is built
-    name = "sysroot-windows_x86_64",
-    src = "//sysroots:sysroot-windows_x86_64-MSVC_14.50.35717-SDK_10.0.22621.0-1BEC42C526532C8C40162A045074FCE4.tar.gz",
-    build_file = "@//sysroots:BUILD.windows_x86_64",
-    transformations = windows_sysroot_transformations,
-)
-
-local_archive(
-    # see `sysroots/README.md` to understand how this sysroot is built
-    name = "sysroot-linux-aarch64",
-    src = "//sysroots:sysroot-linux_aarch64_3.3.0.65682.tar.zst",
-    build_file = "@//sysroots:BUILD.linux_aarch64",
-)
-
-local_archive(
-    # see `sysroots/README.md` to understand how this sysroot is built
-    name = "sysroot-linux-x86_64",
-    src = "//sysroots:sysroot-linux_x86_64_3.3.0.65682.tar.zst",
-    build_file = "@//sysroots:BUILD.linux_x86_64",
-)
 
 bazel_dep(name = "rules_rs", version = "0.0.39")
 single_version_override(
@@ -106,23 +62,12 @@ crate.from_cargo(
     use_experimental_platforms = True,  # musl support in features resolution of third-party dependencies
 )
 
-# TODO: having that error on Linux hosts
-#   ERROR: /home/parallels/.cache/JetBrains/MonorepoBazel/51db59cda7fb4f6e1c59be8fdb33a1fc/external/xz+/BUILD.bazel:274:11: Linking external/xz+/liblzma_src_common.a failed: (Exit 1): llvm-ar failed: error executing CppArchive command (from target @@xz+//:lzma_src_common) external/toolchains_llvm++llvm+llvm_toolchain/bin/llvm-ar @bazel-out/x86_64-apple-darwin-fastbuild/bin/external/xz+/liblzma_src_common.a-0.params
-#
-#   Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
-#   external/toolchains_llvm++llvm+llvm_toolchain/bin/llvm-ar: error: unknown option n
-#   OVERVIEW: LLVM Archiver
-#
-#   USAGE: llvm-ar [options] [-]<operation>[modifiers] [relpos] [count] <archive> [files]
-#          llvm-ar -M [<mri-script]
-
-# bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
+bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
 crate.annotation(
     crate = "zstd-sys",
-    gen_build_script = "on",
-    # gen_build_script = "off",  # do not build `zstd` from git submodule sources, resolve it from BCR instead
-    # deps = ["@zstd"],
+    gen_build_script = "off",  # do not build `zstd` from git submodule sources, resolve it from BCR instead
+    deps = ["@zstd"],
 )
-# inject_repo(crate, "zstd")
+inject_repo(crate, "zstd")
 
 use_repo(crate, "crates")

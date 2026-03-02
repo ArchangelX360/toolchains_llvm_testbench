@@ -10,12 +10,11 @@ single_version_override(
 )
 
 bazel_dep(name = "llvm", version = "0.6.1")
-single_version_override(
+archive_override(
     module_name = "llvm",
-    patch_strip = 1,
-    patches = [
-        "//:build/native/llvm/llvm_msvc.patch",  # MSVC support
-    ],
+    integrity = "sha256-OT55jvPrSLPYq1nBi13KCLvSp5rhrbnRc+ROy4DcjQw=",
+    strip_prefix = "toolchains_llvm_bootstrapped-b7fdc4a1412f99e7637aff59d274b5a2e523298c",
+    url = "https://github.com/ArchangelX360/toolchains_llvm_bootstrapped/archive/b7fdc4a1412f99e7637aff59d274b5a2e523298c.tar.gz",
 )
 
 msvc = use_extension("@llvm//runtimes/msvc/extension:msvc.bzl", "msvc")

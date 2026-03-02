@@ -256,7 +256,7 @@
     },
     "@@llvm+//runtimes/msvc/extension:msvc.bzl%msvc": {
       "general": {
-        "bzlTransitiveDigest": "aB0H78t8DOUKMnYP4t2AYBolSfAYa8eujF6UpOA5FvM=",
+        "bzlTransitiveDigest": "JC84WNn9qIh+wljnYUmQBTa/DynI2gpEUseA6xELMIg=",
         "usagesDigest": "SkTYbM6eQcLX1owaeQn5pDu5FH3Ap8DhDA5RP1y5nyM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

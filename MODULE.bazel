@@ -1,5 +1,4 @@
 bazel_dep(name = "platforms", version = "1.0.0")
-
 bazel_dep(name = "rules_cc", version = "0.2.17")
 single_version_override(
     module_name = "rules_cc",
@@ -12,14 +11,23 @@ single_version_override(
 bazel_dep(name = "llvm", version = "0.6.1")
 archive_override(
     module_name = "llvm",
-    integrity = "sha256-Ih0xZTOweu0NWdU/8WSnaHV2JaylpoIjV8GKqpFhH/8=",
-    strip_prefix = "toolchains_llvm_bootstrapped-b5f5370568b3f3f3e630b8178ddb26fdf437575c",
-    url = "https://github.com/ArchangelX360/toolchains_llvm_bootstrapped/archive/b5f5370568b3f3f3e630b8178ddb26fdf437575c.tar.gz",
+    integrity = "sha256-p4Z+mWWhs+Msv1hlzuvpq25QDx2k1vllXAr0p/4s0e0=",
+    strip_prefix = "toolchains_llvm_bootstrapped-8bdabf97d4649c6c4bd05a19231261c234bee233",
+    url = "https://github.com/ArchangelX360/toolchains_llvm_bootstrapped/archive/8bdabf97d4649c6c4bd05a19231261c234bee233.tar.gz",
 )
 
 msvc = use_extension("@llvm//runtimes/msvc/extension:msvc.bzl", "msvc")
-msvc.winsysroot()
-use_repo(msvc, "windows_sdk", "windows_sdk_x64", "windows_sdk_arm64")
+msvc.winsysroot(
+    windows_sysroot_transformations = {
+        "Windows Kits/10/Include/10.0.26100.0/shared/driverspecs.h": "Windows Kits/10/Include/10.0.26100.0/shared/DriverSpecs.h",
+        "Windows Kits/10/Include/10.0.26100.0/shared/specstrings.h": "Windows Kits/10/Include/10.0.26100.0/shared/SpecStrings.h",
+        "**/*.h": "lowercase",
+        "**/*.lib": "lowercase",
+        "**/*.Lib": "lowercase",
+    },
+)
+use_repo(msvc, "windows_sdk", "windows_sdk_arm64", "windows_sdk_x64")
+
 register_toolchains("@llvm//toolchain:all")
 
 bazel_dep(name = "rules_rs", version = "0.0.39")
@@ -27,7 +35,7 @@ single_version_override(
     module_name = "rules_rs",
     patch_strip = 1,
     patches = [
-      # "@//:build/native/rules_rs/rules_rs-create_features.patch",  # keep until https://github.com/dzbarsky/rules_rs/pull/50 is merged
+        # "@//:build/native/rules_rs/rules_rs-create_features.patch",  # keep until https://github.com/dzbarsky/rules_rs/pull/50 is merged
     ],
 )
 
@@ -40,6 +48,7 @@ rust_toolchains.toolchain(
     version = "1.93.1",
 )
 use_repo(rust_toolchains, "default_rust_toolchains")
+
 register_toolchains("@default_rust_toolchains//:all")
 
 crate = use_extension("@rules_rs//rs:extensions.bzl", "crate")
@@ -62,11 +71,13 @@ crate.from_cargo(
 )
 
 bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
+
 crate.annotation(
     crate = "zstd-sys",
     gen_build_script = "off",  # do not build `zstd` from git submodule sources, resolve it from BCR instead
     deps = ["@zstd"],
 )
+
 inject_repo(crate, "zstd")
 
 use_repo(crate, "crates")

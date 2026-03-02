@@ -256,8 +256,8 @@
     },
     "@@llvm+//runtimes/msvc/extension:msvc.bzl%msvc": {
       "general": {
-        "bzlTransitiveDigest": "LJJYJwVg1h7a02q9Rt0NrHUGg031A6FNTCBQXpli8oI=",
-        "usagesDigest": "/JX2pJjwdyZVqS3HM3rnh4xDbinQ7+vzKKORXcjvL2U=",
+        "bzlTransitiveDigest": "aB0H78t8DOUKMnYP4t2AYBolSfAYa8eujF6UpOA5FvM=",
+        "usagesDigest": "SkTYbM6eQcLX1owaeQn5pDu5FH3Ap8DhDA5RP1y5nyM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -271,7 +271,14 @@
               "winsysroot_version": "0.0.2",
               "windows_sdk_version": "10.0.26100",
               "architectures": "x64,arm64",
-              "winsysroot_extra_args": []
+              "winsysroot_extra_args": [],
+              "windows_sysroot_transformations": {
+                "Windows Kits/10/Include/10.0.26100.0/shared/driverspecs.h": "Windows Kits/10/Include/10.0.26100.0/shared/DriverSpecs.h",
+                "Windows Kits/10/Include/10.0.26100.0/shared/specstrings.h": "Windows Kits/10/Include/10.0.26100.0/shared/SpecStrings.h",
+                "**/*.h": "lowercase",
+                "**/*.lib": "lowercase",
+                "**/*.Lib": "lowercase"
+              }
             }
           },
           "windows_sdk_arm64": {
